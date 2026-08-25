@@ -37,7 +37,8 @@
     intro: document.getElementById("intro"),
     scenarioBrief: document.getElementById("scenarioBrief"),
     scenarioSelect: document.getElementById("scenarioSelect"),
-    scenarioSeed: document.getElementById("scenarioSeed")
+    scenarioSeed: document.getElementById("scenarioSeed"),
+    controllerState: document.getElementById("controllerState")
   };
 
   const roads = [
@@ -98,7 +99,40 @@
   const requestedScenario = new URLSearchParams(location.search).get("scenario");
   let scenarioIndex = Math.max(0, SCENARIOS.findIndex(s => s.id === requestedScenario));
   let parkedCars = parkingPatterns[SCENARIOS[scenarioIndex].parking];
+  let previousGamepadButtons = [];
+  let activeGamepadName = "";
   let state;
+
+  function readControls() {
+    const keyboardThrottle = (keys.has("KeyW") || keys.has("ArrowUp") ? 1 : 0) - (keys.has("KeyS") || keys.has("ArrowDown") ? 1 : 0);
+    const keyboardSteer = (keys.has("KeyD") || keys.has("ArrowRight") ? 1 : 0) - (keys.has("KeyA") || keys.has("ArrowLeft") ? 1 : 0);
+    const gamepads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter(Boolean) : [];
+    const gamepad = gamepads[0];
+    let throttle = keyboardThrottle;
+    let steer = keyboardSteer;
+    let salt = keys.has("KeyE");
+    let bladePressed = pressed.has("Space");
+    let startPressed = pressed.has("Enter");
+
+    if (gamepad) {
+      const buttons = gamepad.buttons.map(button => button.pressed);
+      const rt = gamepad.buttons[7]?.value || 0;
+      const lt = gamepad.buttons[6]?.value || 0;
+      const axis = Math.abs(gamepad.axes[0] || 0) > 0.16 ? gamepad.axes[0] : 0;
+      throttle = Math.abs(keyboardThrottle) > 0 ? keyboardThrottle : rt - lt;
+      steer = Math.abs(keyboardSteer) > 0 ? keyboardSteer : axis;
+      salt = salt || Boolean(buttons[2]);
+      bladePressed = bladePressed || Boolean(buttons[0] && !previousGamepadButtons[0]);
+      startPressed = startPressed || Boolean(buttons[9] && !previousGamepadButtons[9]);
+      previousGamepadButtons = buttons;
+      activeGamepadName = gamepad.id || "Gamepad";
+    } else {
+      previousGamepadButtons = [];
+      activeGamepadName = "";
+    }
+
+    return { throttle, steer, salt, bladePressed, startPressed, active: Math.abs(throttle) > 0.08 || Math.abs(steer) > 0.16 || salt || bladePressed || startPressed };
+  }
 
   function isRoad(x, y) {
     return roads.some(r => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) ||
@@ -183,10 +217,9 @@
     });
   }
 
-  function updateTruck(dt) {
+  function updateTruck(dt, controls) {
     const t = state.truck;
-    const throttle = (keys.has("KeyW") || keys.has("ArrowUp") ? 1 : 0) - (keys.has("KeyS") || keys.has("ArrowDown") ? 1 : 0);
-    const steer = (keys.has("KeyD") || keys.has("ArrowRight") ? 1 : 0) - (keys.has("KeyA") || keys.has("ArrowLeft") ? 1 : 0);
+    const { throttle, steer } = controls;
     const depth = snowDepthAt(t.x, t.y);
     const traction = Math.max(0.48, 1 - depth * 0.3);
 
@@ -254,9 +287,9 @@
     }
   }
 
-  function spreadSalt(dt) {
+  function spreadSalt(dt, controls) {
     const t = state.truck;
-    if (!keys.has("KeyE") || t.salt <= 0) return;
+    if (!controls.salt || t.salt <= 0) return;
     t.salt = Math.max(0, t.salt - 8.5 * dt);
     const bx = t.x - Math.cos(t.angle) * 18;
     const by = t.y - Math.sin(t.angle) * 18;
@@ -346,20 +379,20 @@
   function update(dt) {
     if (pressed.has("KeyR")) { reset(); pressed.clear(); return; }
     if (pressed.has("KeyN")) { reset(scenarioIndex + 1); pressed.clear(); return; }
+    const controls = readControls();
     if (state.phase === "ready") {
-      const startsShift = ["Enter", "Space", "KeyW", "KeyS", "KeyA", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyE"].some(code => pressed.has(code));
-      if (startsShift) beginShift();
+      if (controls.active) beginShift();
       else { pressed.clear(); return; }
     }
     if (state.phase !== "active") { pressed.clear(); return; }
-    if (pressed.has("Space")) {
+    if (controls.bladePressed) {
       state.truck.blade = !state.truck.blade;
       addEvent(`Blade ${state.truck.blade ? "lowered" : "raised"}.`);
     }
     state.elapsed += dt;
-    updateTruck(dt);
+    updateTruck(dt, controls);
     plowSnow(dt);
-    spreadSalt(dt);
+    spreadSalt(dt, controls);
     updateWeather(dt);
     state.logCooldown -= dt;
     if (state.logCooldown <= 0) {
@@ -581,6 +614,8 @@
     ui.harm.textContent = buried ? `${buried} access point${buried > 1 ? "s" : ""} buried` : "No blocked access points";
     ui.blade.textContent = state.truck.blade ? "BLADE LOWERED · SNOW → RIGHT" : "BLADE RAISED";
     ui.blade.classList.toggle("raised", !state.truck.blade);
+    ui.controllerState.textContent = activeGamepadName ? `CONTROLLER READY · ${activeGamepadName.slice(0, 28)}` : "NO CONTROLLER DETECTED";
+    ui.controllerState.classList.toggle("connected", Boolean(activeGamepadName));
     ui.destinations.innerHTML = destinations.map(d => {
       const pct = Math.round(d.access * 100);
       const cls = pct >= 70 ? "" : pct >= 45 ? "strained" : "blocked";

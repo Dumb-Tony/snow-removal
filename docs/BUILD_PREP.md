@@ -21,7 +21,8 @@
 - [ ] Stronger blade-right discharge animation and temporary trajectory arc.
 - [x] Depot-to-destination connectivity through passable snow cells.
 - [x] World-map visualization of the connected access network.
-- [ ] Keyboard remapping and Gamepad API support.
+- [x] Gamepad API support matching the planned Unity action map.
+- [ ] Keyboard remapping and configurable gamepad bindings.
 - [ ] Audio feedback for blade, impact, low resource, and destination status.
 - [x] Seeded scenario selection, shareable query parameter, parked-car patterns, and deterministic reset.
 - [x] Dependency-free tests for seed stability, connectivity, access hysteresis, and score thresholds.
@@ -88,7 +89,7 @@
 | Reset shift | R | Edge-triggered; restores initial state |
 | Next scenario | N | Edge-triggered; advances the deterministic scenario and returns to READY |
 
-Planned controller mapping: RT throttle, LT brake/reverse, left stick steering, A blade toggle, X salt, Menu pause.
+Implemented controller mapping: RT throttle, LT brake/reverse, left stick steering, A blade toggle, X salt, Menu starts the shift. Pause remains pending.
 
 ## State-machine specifications
 
@@ -201,7 +202,7 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 1. `app.js`: extract the remaining pure snow-transfer function and add mass-conservation tests.
 2. `app.js`: tune the visible connected-network overlay and passable-depth threshold from playtests.
 3. `app.js`: tune destination hysteresis thresholds and dispatch wording from playtests.
-4. `app.js`: implement Gamepad API and a compact input-remap layer.
+4. `app.js`: add configurable keyboard/gamepad bindings and controller-specific button glyphs.
 5. `styles.css` / `index.html`: add onboarding and accessibility settings modal.
 6. `assets/`: add original engine/blade/salt/alert audio after interaction tuning.
 7. `tests/`: add browser smoke automation and snow-mass invariants without adding runtime dependencies.

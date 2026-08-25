@@ -165,6 +165,7 @@ Audio carries machine state: engine load, tire slip, blade scrape, granular salt
 - Color is reinforced with icons, labels, patterns, and motion.
 - Remappable controls, hold/toggle options, steering sensitivity, camera shake, snow contrast, and reduced-weather mode.
 - Full controller support is a Unity requirement.
+- The browser slice supports the Gamepad API using the planned Unity action semantics.
 - Assist options: extended shift, gentler fuel use, route guidance, automatic blade height, pause-and-plan solo mode.
 - Text avoids tiny overlays; essential messages persist in an event log.
 

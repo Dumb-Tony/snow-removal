@@ -72,6 +72,8 @@ meter { width: 100%; height: 11px; accent-color: var(--green); }
 kbd { display: inline-block; padding: 2px 6px; border: 1px solid #557080; border-bottom-width: 2px; border-radius: 4px; color: var(--ink); background: #203642; font: inherit; font-weight: 700; }
 .blade-state { margin-top: 10px; border: 1px solid var(--green); border-radius: 5px; padding: 7px; text-align: center; color: var(--green); font-size: .7rem; font-weight: 900; letter-spacing: .12em; }
 .blade-state.raised { border-color: #637b88; color: #8da1ac; }
+.controller-state { margin-top: 10px; color: #708894; font-size: .61rem; font-weight: 800; letter-spacing: .1em; text-align: center; }
+.controller-state.connected { color: var(--blue); }
 
 .debrief, .intro { position: absolute; inset: 8% 12%; display: grid; align-content: center; justify-items: center; padding: 30px; border: 1px solid #68808e; border-radius: 14px; background: #0d1920ee; box-shadow: 0 30px 90px #000b; text-align: center; backdrop-filter: blur(8px); }
 .debrief.hidden, .intro.hidden { display: none; }
