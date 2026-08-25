@@ -173,6 +173,7 @@ The browser slice uses restrained synthesized cues for system-state validation; 
 - Full controller support is a Unity requirement.
 - The browser slice supports the Gamepad API using the planned Unity action semantics.
 - Assist options: extended shift, gentler fuel use, route guidance, automatic blade height, pause-and-plan solo mode.
+- Solo browser play supports pause-and-plan at any time and pauses automatically on focus loss.
 - Text avoids tiny overlays; essential messages persist in an event log.
 - Browser presentation preferences can suppress repeat briefings and reduce visual snowfall without changing accumulation or score.
 

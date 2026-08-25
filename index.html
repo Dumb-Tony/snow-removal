@@ -30,6 +30,12 @@
           </div>
           <button id="startButton" type="button">Begin shift <kbd>Enter</kbd></button>
         </div>
+        <div id="pauseOverlay" class="pause-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+          <p class="eyebrow">RADIO HOLD</p>
+          <h2 id="pauseTitle">Shift paused</h2>
+          <p>Weather and shift time are stopped while you plan.</p>
+          <button id="resumeButton" type="button">Resume shift <kbd>P</kbd></button>
+        </div>
         <div id="debrief" class="debrief hidden" role="dialog" aria-modal="true" aria-labelledby="debriefTitle">
           <p class="eyebrow">SHIFT DEBRIEF</p>
           <h2 id="debriefTitle">Town status</h2>
@@ -82,6 +88,7 @@
           <p><kbd>E</kbd> Hold to salt</p>
           <p><kbd>R</kbd> Reset shift</p>
           <p><kbd>N</kbd> Next scenario</p>
+          <p><kbd>P</kbd> / <kbd>Esc</kbd> Pause</p>
           <p><kbd>Gamepad</kbd> RT/LT drive · A blade · X salt</p>
           <div id="controllerState" class="controller-state">NO CONTROLLER DETECTED</div>
           <div id="bladeState" class="blade-state raised">BLADE RAISED</div>

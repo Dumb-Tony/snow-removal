@@ -41,7 +41,8 @@
     controllerState: document.getElementById("controllerState"),
     briefingToggle: document.getElementById("briefingToggle"),
     weatherToggle: document.getElementById("weatherToggle"),
-    soundToggle: document.getElementById("soundToggle")
+    soundToggle: document.getElementById("soundToggle"),
+    pauseOverlay: document.getElementById("pauseOverlay")
   };
 
   const roads = [
@@ -227,6 +228,7 @@
     addEvent("Dispatch: open the clinic, market, and Station 2.");
     addEvent("Snow leaves the blade on your right. Mind the amber zones.", true);
     ui.debrief.classList.add("hidden");
+    ui.pauseOverlay.classList.add("hidden");
     ui.intro.classList.toggle("hidden", !preferences.showBriefing);
     ui.scenarioBrief.textContent = scenario.brief;
     ui.scenarioSelect.value = scenario.id;
@@ -245,6 +247,20 @@
     ensureAudio();
     ui.intro.classList.add("hidden");
     addEvent(`${state.scenario.name}: shift clock started.`);
+  }
+
+  function pauseShift() {
+    if (!state || state.phase !== "active") return;
+    state.phase = "paused";
+    state.truck.speed = 0;
+    ui.pauseOverlay.classList.remove("hidden");
+  }
+
+  function resumeShift() {
+    if (state.phase !== "paused") return;
+    state.phase = "active";
+    ui.pauseOverlay.classList.add("hidden");
+    ensureAudio();
   }
 
   function addEvent(text, warn = false) {
@@ -507,9 +523,19 @@
     if (pressed.has("KeyR")) { reset(); pressed.clear(); return; }
     if (pressed.has("KeyN")) { reset(scenarioIndex + 1); pressed.clear(); return; }
     const controls = readControls();
+    const pausePressed = pressed.has("KeyP") || pressed.has("Escape") || controls.startPressed;
+    if (state.phase === "paused") {
+      if (pausePressed) resumeShift();
+      pressed.clear();
+      return;
+    }
     if (state.phase === "ready") {
       if (controls.active) beginShift();
       else { pressed.clear(); return; }
+    } else if (pausePressed) {
+      pauseShift();
+      pressed.clear();
+      return;
     }
     if (state.phase !== "active") { pressed.clear(); return; }
     if (controls.bladePressed) {
@@ -835,10 +861,11 @@
     keys.add(e.code);
   });
   window.addEventListener("keyup", e => keys.delete(e.code));
-  window.addEventListener("blur", () => { keys.clear(); pressed.clear(); });
+  window.addEventListener("blur", () => { keys.clear(); pressed.clear(); pauseShift(); });
   document.getElementById("restartButton").addEventListener("click", reset);
   document.getElementById("downloadDebrief").addEventListener("click", downloadDebrief);
   document.getElementById("startButton").addEventListener("click", beginShift);
+  document.getElementById("resumeButton").addEventListener("click", resumeShift);
   ui.scenarioSelect.innerHTML = SCENARIOS.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
   ui.scenarioSelect.addEventListener("change", () => reset(SCENARIOS.findIndex(s => s.id === ui.scenarioSelect.value)));
   ui.briefingToggle.checked = preferences.showBriefing;

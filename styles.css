@@ -78,10 +78,13 @@ kbd { display: inline-block; padding: 2px 6px; border: 1px solid #557080; border
 .preferences label { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: .68rem; }
 .preferences input { accent-color: var(--blue); }
 
-.debrief, .intro { position: absolute; inset: 8% 12%; display: grid; align-content: center; justify-items: center; padding: 30px; border: 1px solid #68808e; border-radius: 14px; background: #0d1920ee; box-shadow: 0 30px 90px #000b; text-align: center; backdrop-filter: blur(8px); }
-.debrief.hidden, .intro.hidden { display: none; }
+.debrief, .intro, .pause-overlay { position: absolute; inset: 8% 12%; display: grid; align-content: center; justify-items: center; padding: 30px; border: 1px solid #68808e; border-radius: 14px; background: #0d1920ee; box-shadow: 0 30px 90px #000b; text-align: center; backdrop-filter: blur(8px); }
+.pause-overlay { inset: 24% 26%; }
+.debrief.hidden, .intro.hidden, .pause-overlay.hidden { display: none; }
 .debrief h2 { margin: 0; font-size: 2rem; }
 .intro h2 { margin: 0; font-size: 2rem; }
+.pause-overlay h2 { margin: 0; font-size: 2rem; }
+.pause-overlay p:not(.eyebrow) { color: var(--muted); }
 .intro-copy { max-width: 590px; margin: 10px 0 18px; color: #c2d4dc; }
 .briefing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 0 0 22px; text-align: left; }
 .briefing-grid article { min-height: 106px; border: 1px solid #38505d; border-radius: 7px; padding: 12px; background: #152832; }
@@ -109,6 +112,7 @@ button kbd { margin-left: 8px; border-color: #2b759c; color: #082033; background
   .storm-chip { display: none; }
   .debrief { inset: 3%; }
   .intro { inset: 3%; }
+  .pause-overlay { inset: 18% 5%; }
   .briefing-grid { grid-template-columns: 1fr; gap: 5px; }
   .briefing-grid article { min-height: auto; }
   .debrief-stats { gap: 8px; }

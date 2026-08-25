@@ -16,8 +16,9 @@ Choose one of three deterministic storm scenarios from the sidebar, or share a s
 - Spread salt: `E`
 - Reset shift: `R`
 - Next scenario: `N`
+- Pause/resume: `P` or `Escape`
 
-Gamepad: left stick steers, RT accelerates, LT brakes/reverses, A toggles the blade, X spreads salt, and Menu begins a briefing.
+Gamepad: left stick steers, RT accelerates, LT brakes/reverses, A toggles the blade, X spreads salt, and Menu begins or pauses the shift.
 
 Clear continuous routes from the Public Works Yard to the blue priority approaches at the fire station, clinic, and grocery store. Isolated clear patches do not count as civic access. Snow is pushed to the side of the blade rather than deleted, so careless passes can bury driveways and hydrants. Return to the depot before fuel runs out.
 

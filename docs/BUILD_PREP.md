@@ -90,17 +90,19 @@
 | Spread salt | E | Hold; consumes salt and treats cells behind truck |
 | Reset shift | R | Edge-triggered; restores initial state |
 | Next scenario | N | Edge-triggered; advances the deterministic scenario and returns to READY |
+| Pause/resume | P / Escape | Freezes weather, vehicle, incidents, and shift time; focus loss pauses automatically |
 
-Implemented controller mapping: RT throttle, LT brake/reverse, left stick steering, A blade toggle, X salt, Menu starts the shift. Pause remains pending.
+Implemented controller mapping: RT throttle, LT brake/reverse, left stick steering, A blade toggle, X salt, Menu starts/pauses/resumes the shift.
 
 ## State-machine specifications
 
 ### Shift
 
-`READY → ACTIVE → DEBRIEF`
+`READY → ACTIVE ↔ PAUSED → DEBRIEF`
 
 - READY: static instructions; first movement or tool input enters ACTIVE.
 - ACTIVE: timer, weather, resources, scoring, and vehicle simulate.
+- PAUSED: simulation and shift time freeze; focus loss enters this state automatically.
 - DEBRIEF: simulation freezes; final metrics shown; reset returns READY.
 
 The current slice enters READY behind a concise briefing. The shift clock remains paused until the player presses Enter, clicks Begin Shift, or provides a driving/tool input.
