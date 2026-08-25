@@ -2,7 +2,7 @@
 
 A no-build Canvas prototype about keeping a small town moving during an active storm.
 
-> **Public playtest:** Pending the first GitHub Pages publish. The canonical repository is prepared for root-folder Pages deployment.
+> **Public playtest:** [Play SNOW REMOVAL in your browser](https://dumb-tony.github.io/snow-removal/)
 
 ## Play
 
