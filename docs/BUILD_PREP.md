@@ -26,6 +26,7 @@
 - [x] Dependency-free synthesized cues for blade, impact, low resource, NPC, destination, and outcome status.
 - [x] Seeded scenario selection, shareable query parameter, parked-car patterns, and deterministic reset.
 - [x] Dependency-free tests for seed stability, connectivity, access hysteresis, and score thresholds.
+- [x] Static project-integrity tests for local assets, script order, runtime dependencies, and DOM contracts.
 - [x] Downloadable versioned JSON debrief for seeded playtest comparison.
 - [x] Persistent repeat-briefing and reduced-weather presentation preferences.
 
@@ -209,4 +210,4 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 4. `app.js`: add configurable keyboard/gamepad bindings and controller-specific button glyphs.
 5. `styles.css` / `index.html`: expand the inline accessibility preferences into remappable settings.
 6. `assets/`: add original engine/blade/salt/alert audio after interaction tuning.
-7. `tests/`: add browser smoke automation and snow-mass invariants without adding runtime dependencies.
+7. `tests/`: add browser smoke automation and snow-mass invariants; project-integrity coverage is in place.
