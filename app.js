@@ -8,8 +8,9 @@
   const CELL = 40;
   const COLS = W / CELL;
   const ROWS = H / CELL;
-  const SHIFT_SECONDS = 180;
-  const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, createDebrief } = window.SnowCore;
+  const QA_MODE = new URLSearchParams(location.search).get("qa") === "1";
+  const SHIFT_SECONDS = QA_MODE ? 5 : 180;
+  const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, createDebrief } = window.SnowCore;
 
   const SCENARIOS = [
     { id: "steady", name: "Steady Start", seed: 117, brief: "A routine afternoon storm is building. Open the three civic routes before accumulation outruns the crew.", baseSnow: 0.38, snowVariance: 0.24, stormBase: 0.38, gustScale: 0.34, salt: 100, parking: 0, npcDelay: 42 },
@@ -194,23 +195,26 @@
       (x >= depot.x && x <= depot.x + depot.w && y >= depot.y && y <= depot.y + depot.h);
   }
 
-  function reset(nextScenario = scenarioIndex) {
+  function reset(nextScenario = scenarioIndex, aftermath = null) {
     scenarioIndex = (nextScenario + SCENARIOS.length) % SCENARIOS.length;
     const scenario = SCENARIOS[scenarioIndex];
     parkedCars = parkingPatterns[scenario.parking];
-    const snow = new Float32Array(COLS * ROWS);
+    const snow = aftermath?.snow?.length === COLS * ROWS ? carrySnowField(aftermath.snow) : new Float32Array(COLS * ROWS);
     const treated = new Float32Array(COLS * ROWS);
-    for (let y = 0; y < ROWS; y++) {
-      for (let x = 0; x < COLS; x++) {
-        const wx = x * CELL + CELL / 2;
-        const wy = y * CELL + CELL / 2;
-        snow[y * COLS + x] = isRoad(wx, wy) ? scenario.baseSnow + noise2D(x, y, scenario.seed) * scenario.snowVariance : 0.72;
+    if (!aftermath) {
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const wx = x * CELL + CELL / 2;
+          const wy = y * CELL + CELL / 2;
+          snow[y * COLS + x] = isRoad(wx, wy) ? scenario.baseSnow + noise2D(x, y, scenario.seed) * scenario.snowVariance : 0.72;
+        }
       }
     }
     sensitive.forEach(s => { s.buried = false; });
     destinations.forEach(d => { d.access = 0; d.lastStatus = ""; });
     state = {
       phase: preferences.showBriefing ? "ready" : "active",
+      townCycle: aftermath ? aftermath.townCycle + 1 : 1,
       elapsed: 0,
       snow,
       treated,
@@ -230,9 +234,11 @@
     ui.debrief.classList.add("hidden");
     ui.pauseOverlay.classList.add("hidden");
     ui.intro.classList.toggle("hidden", !preferences.showBriefing);
-    ui.scenarioBrief.textContent = scenario.brief;
+    ui.scenarioBrief.textContent = aftermath
+      ? `Aftermath shift ${state.townCycle}: prior snowbanks remain after overnight settling. ${scenario.brief}`
+      : scenario.brief;
     ui.scenarioSelect.value = scenario.id;
-    ui.scenarioSeed.textContent = `Seed ${scenario.seed} · ${parkedCars.length} parked cars`;
+    ui.scenarioSeed.textContent = `Seed ${scenario.seed} · shift ${state.townCycle} · ${parkedCars.length} parked cars`;
     const url = new URL(location.href);
     url.searchParams.set("scenario", scenario.id);
     history.replaceState(null, "", url);
@@ -582,6 +588,7 @@
     ui.stats.innerHTML = `<span><b>${Math.round(state.metrics.access * 100)}%</b>access</span><span><b>${state.metrics.harm.toFixed(0)}</b>placement harm</span><span><b>${state.metrics.collisions}</b>impacts</span><span><b>${score}</b>score</span>`;
     state.debrief = createDebrief({
       scenario: state.scenario,
+      townCycle: state.townCycle,
       elapsed: state.elapsed,
       access: state.metrics.access,
       harm: state.metrics.harm,
@@ -608,6 +615,11 @@
     link.download = `snow-removal-${state.scenario.id}-${state.scenario.seed}-debrief.json`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  function continueAftermath() {
+    const aftermath = { snow: state.snow.slice(), townCycle: state.townCycle };
+    reset(scenarioIndex, aftermath);
   }
 
   function drawBuilding(b) {
@@ -864,8 +876,9 @@
   });
   window.addEventListener("keyup", e => keys.delete(e.code));
   window.addEventListener("blur", () => { keys.clear(); pressed.clear(); pauseShift(); });
-  document.getElementById("restartButton").addEventListener("click", reset);
+  document.getElementById("restartButton").addEventListener("click", () => reset());
   document.getElementById("downloadDebrief").addEventListener("click", downloadDebrief);
+  document.getElementById("continueAftermath").addEventListener("click", continueAftermath);
   document.getElementById("startButton").addEventListener("click", beginShift);
   document.getElementById("resumeButton").addEventListener("click", resumeShift);
   ui.scenarioSelect.innerHTML = SCENARIOS.map(s => `<option value="${s.id}">${s.name}</option>`).join("");

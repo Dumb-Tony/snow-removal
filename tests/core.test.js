@@ -1,7 +1,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
-const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, createDebrief } = require("../core.js");
+const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, createDebrief } = require("../core.js");
 
 function test(name, fn) {
   try { fn(); console.log(`✓ ${name}`); }
@@ -56,6 +56,17 @@ test("plow transfer reports bank-capacity overflow and protects same-cell edges"
   assert.deepEqual(Array.from(field), unchanged);
 });
 
+test("aftermath carryover settles loose snow without erasing banks or mutating history", () => {
+  const original = new Float32Array([0, 0.2, 1.4, 2.5]);
+  const snapshot = Array.from(original);
+  const carried = carrySnowField(original);
+  assert.deepEqual(Array.from(original), snapshot);
+  assert.equal(carried[0], 0);
+  assert.ok(carried[1] < original[1]);
+  assert.ok(carried[2] > 1.3);
+  assert.ok(carried[3] > 2.4);
+});
+
 test("score rewards access and resources while charging harm", () => {
   assert.equal(scoreShift({ access: 1, fuel: 100, salt: 100, harm: 0, collisions: 0 }), 114);
   assert.equal(scoreShift({ access: 0.5, fuel: 50, salt: 50, harm: 8, collisions: 2 }), 43);
@@ -66,6 +77,7 @@ test("score rewards access and resources while charging harm", () => {
 test("debrief export is stable, compact, and JSON-safe", () => {
   const record = createDebrief({
     scenario: { id: "steady", name: "Steady Start", seed: 117 },
+    townCycle: 2,
     elapsed: 179.6,
     access: 0.745,
     harm: 4.236,
@@ -84,6 +96,7 @@ test("debrief export is stable, compact, and JSON-safe", () => {
   assert.equal(record.outcome.civicAccessPercent, 75);
   assert.equal(record.outcome.placementHarm, 4.24);
   assert.equal(record.shift.returnedToDepot, true);
+  assert.equal(record.shift.townCycle, 2);
   assert.equal(record.outcome.npcDelaySeconds, 13);
   assert.equal(record.outcome.snowMoved, 2.346);
   assert.doesNotThrow(() => JSON.stringify(record));

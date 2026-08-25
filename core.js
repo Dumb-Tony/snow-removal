@@ -63,12 +63,21 @@
     return { removed, deposited, lost: removed - deposited };
   }
 
-  function createDebrief({ scenario, elapsed, access, harm, collisions, score, fuel, salt, returnedToDepot, npcDelaySeconds = 0, npcIncidents = 0, snowMoved = 0, snowLost = 0, completedAt }) {
+  function carrySnowField(field, { settling = 0.04 } = {}) {
+    const carried = new Float32Array(field.length);
+    for (let i = 0; i < field.length; i++) {
+      const depth = Math.max(0, field[i]);
+      carried[i] = Math.max(0, depth - Math.min(settling, depth * 0.08));
+    }
+    return carried;
+  }
+
+  function createDebrief({ scenario, townCycle = 1, elapsed, access, harm, collisions, score, fuel, salt, returnedToDepot, npcDelaySeconds = 0, npcIncidents = 0, snowMoved = 0, snowLost = 0, completedAt }) {
     return {
       format: "snow-removal-debrief-v1",
       completedAt: completedAt || new Date().toISOString(),
       scenario: { id: scenario.id, name: scenario.name, seed: scenario.seed },
-      shift: { elapsedSeconds: Math.round(elapsed), returnedToDepot: Boolean(returnedToDepot) },
+      shift: { townCycle, elapsedSeconds: Math.round(elapsed), returnedToDepot: Boolean(returnedToDepot) },
       outcome: {
         civicAccessPercent: Math.round(access * 100),
         placementHarm: Number(harm.toFixed(2)),
@@ -84,5 +93,5 @@
     };
   }
 
-  return { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, createDebrief };
+  return { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, createDebrief };
 });

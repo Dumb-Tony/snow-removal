@@ -46,6 +46,8 @@ Players are competent operators doing a difficult public job with imperfect info
 
 Review outcomes, pay costs, retain town consequences, repair equipment, choose upgrades, and respond to the next forecast. Persistent snowbanks narrow future roads, buried hydrants increase fire risk, and neglected side streets reduce public trust.
 
+The browser slice validates the first persistence layer: after debrief, players may continue into another shift with the exact snow field carried forward after small between-shift settling. Clean seeded restart remains available for controlled comparisons.
+
 ## Moment-to-moment interactions
 
 - Accelerate, steer, brake, and reverse a weighty vehicle.
@@ -285,4 +287,4 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 2. Add controller input and a reduced-repeat briefing option.
 3. Tune the recoverable delivery-van incident and add obstruction attribution to the debrief.
 4. Collect structured debrief JSON from playtests and tune scenario thresholds.
-5. Prototype persistent bank carryover into a second shift.
+5. Collect multi-shift aftermath debriefs and decide which additional town consequences persist.

@@ -45,6 +45,10 @@ This is a systems proof, not a content-complete game. The truck uses readable ar
 
 Run all dependency-free checks with `node tests/run.js`. The suite covers seeded snow generation, connected-route flood fill, snow-transfer conservation and bank capacity, access-state hysteresis, civic scoring, debrief structure, local asset integrity, script ordering, and HTML/JavaScript contract mismatches.
 
+Maintainers can append `?qa=1` (or `&qa=1` after a scenario) to run a five-second shift for rapid debrief, restart, download, and aftermath smoke testing. Normal shifts remain three minutes.
+
 The end-of-shift screen can download a compact JSON debrief for structured playtest comparison. Presentation preferences for repeat briefings and reduced weather visuals stay in the player's browser and do not alter the simulation.
+
+After a shift, **Continue with these snowbanks** starts another pass through the same scenario with the actual snow field carried forward after slight settling. A normal restart still produces a clean seeded shift.
 
 Low-volume synthesized cues communicate blade movement, impacts, warnings, route recovery, and shift outcome. They can be muted persistently from the sidebar.

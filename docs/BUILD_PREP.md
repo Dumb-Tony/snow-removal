@@ -27,6 +27,7 @@
 - [x] Seeded scenario selection, shareable query parameter, parked-car patterns, and deterministic reset.
 - [x] Dependency-free tests for seed stability, connectivity, access hysteresis, and score thresholds.
 - [x] Static project-integrity tests for local assets, script order, runtime dependencies, and DOM contracts.
+- [x] Explicit `qa=1` short-shift hook for browser-testing end-state flows.
 - [x] Downloadable versioned JSON debrief for seeded playtest comparison.
 - [x] Persistent repeat-briefing and reduced-weather presentation preferences.
 
@@ -36,7 +37,7 @@
 - [x] One NPC delivery van that can become stuck in deep snow and recover when cleared.
 - [ ] Tow interaction and recoverable obstruction.
 - [ ] Second vehicle/AI helper interface.
-- [ ] Persistent two-shift aftermath.
+- [x] Optional two-plus-shift snow-field aftermath with slight between-shift settling.
 - [ ] Repair cost and simple seasonal budget mock.
 
 ### P3 — Unity migration spikes
