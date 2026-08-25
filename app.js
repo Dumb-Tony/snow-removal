@@ -180,6 +180,7 @@
       scenario,
       truck: { x: 145, y: 505, angle: -Math.PI / 2, speed: 0, fuel: 100, salt: scenario.salt, blade: false, hitTimer: 0, leftDepot: false },
       npc: { x: 900, y: 300, w: 42, h: 20, active: false, completed: false, status: "MOVING", incidents: 0, delaySeconds: 0 },
+      spray: [],
       weather: { intensity: scenario.stormBase, gust: 0, visibility: 1 },
       metrics: { collisions: 0, harm: 0, access: 0, score: 0 },
       events: [],
@@ -307,7 +308,29 @@
       const dy = sy + rightY * 48;
       const dest = snowIndexAt(dx, dy);
       state.snow[dest] = Math.min(2.5, state.snow[dest] + removable * 0.9);
+      if (removable > 0.008 && state.spray.length < 90) {
+        const variance = noise2D(Math.floor(sx), Math.floor(sy), Math.floor(state.elapsed * 30) + state.scenario.seed);
+        state.spray.push({
+          x: sx,
+          y: sy,
+          vx: rightX * (54 + variance * 30) + fx * 8,
+          vy: rightY * (54 + variance * 30) + fy * 8,
+          life: 0.36 + variance * 0.18,
+          size: 1.8 + variance * 2.4
+        });
+      }
     }
+  }
+
+  function updateSpray(dt) {
+    for (const particle of state.spray) {
+      particle.x += particle.vx * dt;
+      particle.y += particle.vy * dt;
+      particle.vx *= Math.pow(0.92, dt * 60);
+      particle.vy *= Math.pow(0.92, dt * 60);
+      particle.life -= dt;
+    }
+    state.spray = state.spray.filter(particle => particle.life > 0);
   }
 
   function spreadSalt(dt, controls) {
@@ -457,6 +480,7 @@
     spreadSalt(dt, controls);
     updateWeather(dt);
     updateNpc(dt);
+    updateSpray(dt);
     state.logCooldown -= dt;
     if (state.logCooldown <= 0) {
       updateAccess();
@@ -649,6 +673,16 @@
     }
   }
 
+  function drawSpray() {
+    for (const particle of state.spray) {
+      const alpha = Math.min(0.9, particle.life * 2.4);
+      ctx.fillStyle = `rgba(230, 247, 255, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
   function drawTruck() {
     const t = state.truck;
     ctx.save();
@@ -706,6 +740,7 @@
     drawWorld();
     drawSnow();
     drawConnectivity();
+    drawSpray();
     drawCars();
     drawNpc();
     drawTruck();

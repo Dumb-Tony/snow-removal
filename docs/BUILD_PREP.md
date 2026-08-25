@@ -18,7 +18,7 @@
 ### P1 — Legibility and tuning
 
 - [x] First-shift briefing with paused clock and scenario-specific dispatch context.
-- [ ] Stronger blade-right discharge animation and temporary trajectory arc.
+- [x] Volume-driven blade-right spray trail tied to actual snow transfer.
 - [x] Depot-to-destination connectivity through passable snow cells.
 - [x] World-map visualization of the connected access network.
 - [x] Gamepad API support matching the planned Unity action map.

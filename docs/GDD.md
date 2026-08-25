@@ -156,6 +156,8 @@ Stylized low-poly 3D with chunky vehicle silhouettes, readable attachment geomet
 
 The browser slice uses a clean diagrammatic town: charcoal roads, warm buildings, blue priority markings, amber-sensitive edges, and layered snow cells. It is a systems instrument, not a promise of final rendering.
 
+Plow spray particles are presentation-only but originate from authoritative transfer samples, making the blade-right discharge direction readable without inventing snow volume.
+
 ## Audio direction
 
 Audio carries machine state: engine load, tire slip, blade scrape, granular salt, snow hitting banks, hydraulic clunks, beacons, and muffled storm ambience. Music is sparse and reactive, giving way to radio chatter and vehicle rhythm. Co-op callouts duck nonessential audio. Accessibility provides visual equivalents for all critical cues.
