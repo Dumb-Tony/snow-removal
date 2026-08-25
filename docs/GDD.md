@@ -1,6 +1,6 @@
 # SNOW REMOVAL — Living Game Design Document
 
-**Status:** Browser vertical slice v0.1  
+**Status:** Browser vertical slice v0.2  
 **Last updated:** 2026-08-25  
 **North star:** Every cleared road should leave a new problem somewhere else.
 

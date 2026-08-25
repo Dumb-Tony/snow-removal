@@ -53,7 +53,7 @@
 |---|---|---|
 | M0 Design-ready | Documents, scope, architecture, scaffold | Another developer can implement without unresolved fundamentals |
 | M1 Functional loop | Current browser v0.1 | One complete shift is playable from file open to debrief |
-| M2 Readable slice | Onboarding, tuning, sound, controller | 4/5 new players explain access versus placement tradeoff |
+| M2 Readable slice | Current browser v0.2: onboarding, scenarios, feedback, sound, controller | 4/5 new players explain access versus placement tradeoff |
 | M3 Durable systems | Seeds, NPC incident, persistence mock | Two shifts produce distinct, recoverable aftermath stories |
 | M4 Unity proof | 3D/network spikes | Two clients observe consistent useful snow state |
 

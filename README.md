@@ -26,6 +26,7 @@ Clear continuous routes from the Public Works Yard to the blue priority approach
 
 - `docs/GDD.md` — living game design document and decision log
 - `docs/BUILD_PREP.md` — backlog, milestones, acceptance criteria, specifications, and QA
+- `docs/PLAYTEST.md` — short friend-playtest protocol, questions, and known limitations
 
 ## Repository and deployment policy
 
