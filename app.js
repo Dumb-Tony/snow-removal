@@ -9,12 +9,12 @@
   const COLS = W / CELL;
   const ROWS = H / CELL;
   const SHIFT_SECONDS = 180;
-  const { noise2D, floodConnected, classifyAccess, scoreShift, createDebrief } = window.SnowCore;
+  const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, createDebrief } = window.SnowCore;
 
   const SCENARIOS = [
-    { id: "steady", name: "Steady Start", seed: 117, brief: "A routine afternoon storm is building. Open the three civic routes before accumulation outruns the crew.", baseSnow: 0.38, snowVariance: 0.24, stormBase: 0.38, gustScale: 0.34, salt: 100, parking: 0 },
-    { id: "lake-effect", name: "Lake-Effect Push", seed: 382, brief: "A narrow lake-effect band has settled over town. Snow is deeper, gusts are stronger, and the hopper starts partially used.", baseSnow: 0.48, snowVariance: 0.3, stormBase: 0.52, gustScale: 0.46, salt: 76, parking: 1 },
-    { id: "event-night", name: "Event Night", seed: 911, brief: "Downtown parking is packed during a fast-moving squall. Work precise lines and protect the clinic approach.", baseSnow: 0.42, snowVariance: 0.27, stormBase: 0.45, gustScale: 0.38, salt: 88, parking: 2 }
+    { id: "steady", name: "Steady Start", seed: 117, brief: "A routine afternoon storm is building. Open the three civic routes before accumulation outruns the crew.", baseSnow: 0.38, snowVariance: 0.24, stormBase: 0.38, gustScale: 0.34, salt: 100, parking: 0, npcDelay: 42 },
+    { id: "lake-effect", name: "Lake-Effect Push", seed: 382, brief: "A narrow lake-effect band has settled over town. Snow is deeper, gusts are stronger, and the hopper starts partially used.", baseSnow: 0.48, snowVariance: 0.3, stormBase: 0.52, gustScale: 0.46, salt: 76, parking: 1, npcDelay: 24 },
+    { id: "event-night", name: "Event Night", seed: 911, brief: "Downtown parking is packed during a fast-moving squall. Work precise lines and protect the clinic approach.", baseSnow: 0.42, snowVariance: 0.27, stormBase: 0.45, gustScale: 0.38, salt: 88, parking: 2, npcDelay: 31 }
   ];
 
   const ui = {
@@ -179,6 +179,7 @@
       treated,
       scenario,
       truck: { x: 145, y: 505, angle: -Math.PI / 2, speed: 0, fuel: 100, salt: scenario.salt, blade: false, hitTimer: 0, leftDepot: false },
+      npc: { x: 900, y: 300, w: 42, h: 20, active: false, completed: false, status: "MOVING", incidents: 0, delaySeconds: 0 },
       weather: { intensity: scenario.stormBase, gust: 0, visibility: 1 },
       metrics: { collisions: 0, harm: 0, access: 0, score: 0 },
       events: [],
@@ -229,7 +230,10 @@
   function truckBlocked(x, y) {
     const radius = 13;
     if (!isRoad(x, y)) return true;
-    return parkedCars.some(c => {
+    const obstacles = state.npc?.active && !state.npc.completed
+      ? [...parkedCars, { x: state.npc.x - state.npc.w / 2, y: state.npc.y - state.npc.h / 2, w: state.npc.w, h: state.npc.h }]
+      : parkedCars;
+    return obstacles.some(c => {
       const nx = Math.max(c.x, Math.min(x, c.x + c.w));
       const ny = Math.max(c.y, Math.min(y, c.y + c.h));
       return (x - nx) ** 2 + (y - ny) ** 2 < radius ** 2;
@@ -330,6 +334,38 @@
     }
   }
 
+  function updateNpc(dt) {
+    const npc = state.npc;
+    if (npc.completed || state.elapsed < state.scenario.npcDelay) return;
+    if (!npc.active) {
+      npc.active = true;
+      addEvent("Northstar delivery van entering on East Road.");
+    }
+
+    const probeX = npc.x - 28;
+    const depth = snowDepthAt(probeX, npc.y);
+    const nextStatus = classifyNpcObstruction(depth, npc.status);
+    if (nextStatus !== npc.status) {
+      npc.status = nextStatus;
+      if (nextStatus === "STUCK") {
+        npc.incidents++;
+        addEvent("Delivery van trapped by deep road snow. Clear its lane!", true);
+      } else {
+        addEvent("Delivery van is moving again. Route recovery confirmed.");
+      }
+    }
+    if (npc.status === "STUCK") {
+      npc.delaySeconds += dt;
+      return;
+    }
+
+    npc.x -= 25 * dt;
+    if (npc.x < 68) {
+      npc.completed = true;
+      addEvent("Delivery van cleared town. Northstar remains supplied.");
+    }
+  }
+
   function computeConnectedRoadCells() {
     const starts = [];
 
@@ -392,7 +428,14 @@
 
     state.metrics.access = accessSum / destinations.length;
     state.metrics.harm = harm;
-    state.metrics.score = scoreShift({ access: state.metrics.access, fuel: state.truck.fuel, salt: state.truck.salt, harm, collisions: state.metrics.collisions });
+    state.metrics.score = scoreShift({
+      access: state.metrics.access,
+      fuel: state.truck.fuel,
+      salt: state.truck.salt,
+      harm,
+      collisions: state.metrics.collisions,
+      delayPenalty: Math.min(15, state.npc.delaySeconds * 0.25)
+    });
   }
 
   function update(dt) {
@@ -413,6 +456,7 @@
     plowSnow(dt);
     spreadSalt(dt, controls);
     updateWeather(dt);
+    updateNpc(dt);
     state.logCooldown -= dt;
     if (state.logCooldown <= 0) {
       updateAccess();
@@ -442,7 +486,9 @@
       score,
       fuel: state.truck.fuel,
       salt: state.truck.salt,
-      returnedToDepot: pointInRect(state.truck.x, state.truck.y, depot)
+      returnedToDepot: pointInRect(state.truck.x, state.truck.y, depot),
+      npcDelaySeconds: state.npc.delaySeconds,
+      npcIncidents: state.npc.incidents
     });
     ui.debrief.classList.remove("hidden");
   }
@@ -563,6 +609,30 @@
     });
   }
 
+  function drawNpc() {
+    const npc = state.npc;
+    if (!npc.active || npc.completed) return;
+    ctx.save();
+    ctx.translate(npc.x, npc.y);
+    ctx.fillStyle = "#10191e";
+    ctx.fillRect(-npc.w / 2 - 2, -npc.h / 2 - 2, npc.w + 4, npc.h + 4);
+    ctx.fillStyle = npc.status === "STUCK" ? "#ff6b5e" : "#e8e0c7";
+    ctx.fillRect(-npc.w / 2, -npc.h / 2, npc.w, npc.h);
+    ctx.fillStyle = "#4b768a";
+    ctx.fillRect(-7, -npc.h / 2 + 4, 16, npc.h - 8);
+    ctx.fillStyle = "#162229";
+    ctx.font = "900 8px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("NPC", 0, 3);
+    if (npc.status === "STUCK") {
+      ctx.fillStyle = "#ff6b5e";
+      ctx.fillRect(-22, -31, 44, 13);
+      ctx.fillStyle = "#111b20";
+      ctx.fillText("STUCK", 0, -21);
+    }
+    ctx.restore();
+  }
+
   function drawConnectivity() {
     if (!state.connected) return;
     ctx.strokeStyle = "rgba(98, 183, 232, .28)";
@@ -637,6 +707,7 @@
     drawSnow();
     drawConnectivity();
     drawCars();
+    drawNpc();
     drawTruck();
     drawWeather();
   }
@@ -654,7 +725,7 @@
     ui.salt.textContent = `${Math.round(state.truck.salt)}%`;
     ui.score.textContent = state.metrics.score;
     const buried = sensitive.filter(s => s.buried).length;
-    ui.harm.textContent = buried ? `${buried} access point${buried > 1 ? "s" : ""} buried` : "No blocked access points";
+    ui.harm.textContent = state.npc.status === "STUCK" ? `NPC delayed ${Math.round(state.npc.delaySeconds)}s` : buried ? `${buried} access point${buried > 1 ? "s" : ""} buried` : "No blocked access points";
     ui.blade.textContent = state.truck.blade ? "BLADE LOWERED · SNOW → RIGHT" : "BLADE RAISED";
     ui.blade.classList.toggle("raised", !state.truck.blade);
     ui.controllerState.textContent = activeGamepadName ? `CONTROLLER READY · ${activeGamepadName.slice(0, 28)}` : "NO CONTROLLER DETECTED";

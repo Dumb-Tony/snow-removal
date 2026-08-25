@@ -140,6 +140,8 @@ Failure is graded, not binary. The shift ends with a civic outcome and a story.
 - A stranded emergency vehicle creates a new top priority.
 - Whiteout causes missed turns and overlapping work.
 
+The browser slice now introduces a Northstar delivery van mid-shift. Deep snow ahead traps it; clearing the lane below a recovery threshold lets it continue. This is the first explicit NPC consequence caused and repaired entirely through the shared snow simulation.
+
 The game explains cause with map history, colored access paths, pile warnings, and a debrief timeline. Recovery should remain possible until the last moments.
 
 ## Town and world design
@@ -276,6 +278,6 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 
 1. Tune snow accumulation, blade transfer, and access thresholds from five fresh-player runs.
 2. Add controller input and a reduced-repeat briefing option.
-3. Add one recoverable NPC-stuck event caused by a bank crossing a lane threshold.
+3. Tune the recoverable delivery-van incident and add obstruction attribution to the debrief.
 4. Collect structured debrief JSON from playtests and tune scenario thresholds.
 5. Prototype persistent bank carryover into a second shift.

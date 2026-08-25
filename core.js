@@ -41,13 +41,18 @@
     return value >= 0.7 ? "OPEN" : value >= 0.45 ? "STRAINED" : "BLOCKED";
   }
 
-  function scoreShift({ access, fuel, salt, harm, collisions }) {
+  function scoreShift({ access, fuel, salt, harm, collisions, delayPenalty = 0 }) {
     const accessPoints = Math.max(0, Math.min(1, access)) * 100;
     const resourceBonus = (Math.max(0, fuel) + Math.max(0, salt)) * 0.07;
-    return Math.max(0, Math.round(accessPoints + resourceBonus - Math.max(0, harm) - Math.max(0, collisions) * 3));
+    return Math.max(0, Math.round(accessPoints + resourceBonus - Math.max(0, harm) - Math.max(0, collisions) * 3 - Math.max(0, delayPenalty)));
   }
 
-  function createDebrief({ scenario, elapsed, access, harm, collisions, score, fuel, salt, returnedToDepot, completedAt }) {
+  function classifyNpcObstruction(depth, previous = "MOVING") {
+    if (previous === "STUCK") return depth < 0.42 ? "MOVING" : "STUCK";
+    return depth >= 0.86 ? "STUCK" : "MOVING";
+  }
+
+  function createDebrief({ scenario, elapsed, access, harm, collisions, score, fuel, salt, returnedToDepot, npcDelaySeconds = 0, npcIncidents = 0, completedAt }) {
     return {
       format: "snow-removal-debrief-v1",
       completedAt: completedAt || new Date().toISOString(),
@@ -57,6 +62,8 @@
         civicAccessPercent: Math.round(access * 100),
         placementHarm: Number(harm.toFixed(2)),
         collisions,
+        npcDelaySeconds: Math.round(npcDelaySeconds),
+        npcIncidents,
         score,
         fuelRemainingPercent: Math.round(fuel),
         saltRemainingPercent: Math.round(salt)
@@ -64,5 +71,5 @@
     };
   }
 
-  return { noise2D, floodConnected, classifyAccess, scoreShift, createDebrief };
+  return { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, createDebrief };
 });

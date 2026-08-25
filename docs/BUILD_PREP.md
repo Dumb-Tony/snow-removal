@@ -32,7 +32,7 @@
 ### P2 — Systems proof
 
 - [ ] Packed snow/ice state and temperature-driven refreeze.
-- [ ] One NPC car that can become stuck or trapped.
+- [x] One NPC delivery van that can become stuck in deep snow and recover when cleared.
 - [ ] Tow interaction and recoverable obstruction.
 - [ ] Second vehicle/AI helper interface.
 - [ ] Persistent two-shift aftermath.
