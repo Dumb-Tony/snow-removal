@@ -40,7 +40,8 @@
     scenarioSeed: document.getElementById("scenarioSeed"),
     controllerState: document.getElementById("controllerState"),
     briefingToggle: document.getElementById("briefingToggle"),
-    weatherToggle: document.getElementById("weatherToggle")
+    weatherToggle: document.getElementById("weatherToggle"),
+    soundToggle: document.getElementById("soundToggle")
   };
 
   const roads = [
@@ -105,8 +106,10 @@
   let activeGamepadName = "";
   const preferences = {
     showBriefing: readPreference("showBriefing", true),
-    reducedWeather: readPreference("reducedWeather", false)
+    reducedWeather: readPreference("reducedWeather", false),
+    soundEnabled: readPreference("soundEnabled", true)
   };
+  let audioContext = null;
   let state;
 
   function readPreference(name, fallback) {
@@ -119,6 +122,39 @@
   function savePreference(name, value) {
     preferences[name] = value;
     try { localStorage.setItem(`snow-removal:${name}`, String(value)); } catch { /* file-mode privacy settings may block storage */ }
+  }
+
+  function ensureAudio() {
+    if (!preferences.soundEnabled) return null;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    if (!audioContext) audioContext = new AudioContextClass();
+    if (audioContext.state === "suspended") void audioContext.resume().catch(() => {});
+    return audioContext;
+  }
+
+  function playCue(type) {
+    const audio = ensureAudio();
+    if (!audio) return;
+    const cues = {
+      blade: { from: 170, to: 105, duration: 0.13, wave: "square", volume: 0.025 },
+      impact: { from: 82, to: 48, duration: 0.18, wave: "sawtooth", volume: 0.035 },
+      warning: { from: 210, to: 210, duration: 0.16, wave: "square", volume: 0.025 },
+      success: { from: 520, to: 720, duration: 0.2, wave: "sine", volume: 0.03 }
+    };
+    const cue = cues[type];
+    if (!cue) return;
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    const now = audio.currentTime;
+    oscillator.type = cue.wave;
+    oscillator.frequency.setValueAtTime(cue.from, now);
+    oscillator.frequency.exponentialRampToValueAtTime(cue.to, now + cue.duration);
+    gain.gain.setValueAtTime(cue.volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + cue.duration);
+    oscillator.connect(gain).connect(audio.destination);
+    oscillator.start(now);
+    oscillator.stop(now + cue.duration);
   }
 
   function readControls() {
@@ -183,6 +219,7 @@
       spray: [],
       weather: { intensity: scenario.stormBase, gust: 0, visibility: 1 },
       metrics: { collisions: 0, harm: 0, access: 0, score: 0 },
+      resourceWarnings: { fuel: false, salt: false },
       events: [],
       logCooldown: 0,
       resupplyCooldown: 0
@@ -205,6 +242,7 @@
   function beginShift() {
     if (state.phase !== "ready") return;
     state.phase = "active";
+    ensureAudio();
     ui.intro.classList.add("hidden");
     addEvent(`${state.scenario.name}: shift clock started.`);
   }
@@ -267,6 +305,7 @@
       if (t.hitTimer <= 0 && Math.abs(t.speed) > 14) {
         state.metrics.collisions++;
         addEvent("Impact reported. Easy on the parked cars.", true);
+        playCue("impact");
         t.hitTimer = 0.65;
       }
       t.speed *= -0.24;
@@ -373,8 +412,10 @@
       if (nextStatus === "STUCK") {
         npc.incidents++;
         addEvent("Delivery van trapped by deep road snow. Clear its lane!", true);
+        playCue("warning");
       } else {
         addEvent("Delivery van is moving again. Route recovery confirmed.");
+        playCue("success");
       }
     }
     if (npc.status === "STUCK") {
@@ -436,6 +477,7 @@
       const status = classifyAccess(d.access, d.lastStatus);
       if (!silent && d.lastStatus && d.lastStatus !== status) {
         addEvent(`${d.name}: access ${status.toLowerCase()}.`, status !== "OPEN");
+        playCue(status === "OPEN" ? "success" : "warning");
       }
       d.lastStatus = status;
     });
@@ -473,6 +515,7 @@
     if (controls.bladePressed) {
       state.truck.blade = !state.truck.blade;
       addEvent(`Blade ${state.truck.blade ? "lowered" : "raised"}.`);
+      playCue("blade");
     }
     state.elapsed += dt;
     updateTruck(dt, controls);
@@ -481,6 +524,16 @@
     updateWeather(dt);
     updateNpc(dt);
     updateSpray(dt);
+    if (state.truck.fuel < 15 && !state.resourceWarnings.fuel) {
+      state.resourceWarnings.fuel = true;
+      addEvent("Fuel below 15%. Return to the yard.", true);
+      playCue("warning");
+    }
+    if (state.truck.salt < 15 && !state.resourceWarnings.salt) {
+      state.resourceWarnings.salt = true;
+      addEvent("Salt hopper below 15%.", true);
+      playCue("warning");
+    }
     state.logCooldown -= dt;
     if (state.logCooldown <= 0) {
       updateAccess();
@@ -515,6 +568,7 @@
       npcIncidents: state.npc.incidents
     });
     ui.debrief.classList.remove("hidden");
+    playCue(score >= 70 ? "success" : "warning");
   }
 
   function downloadDebrief() {
@@ -789,8 +843,14 @@
   ui.scenarioSelect.addEventListener("change", () => reset(SCENARIOS.findIndex(s => s.id === ui.scenarioSelect.value)));
   ui.briefingToggle.checked = preferences.showBriefing;
   ui.weatherToggle.checked = preferences.reducedWeather;
+  ui.soundToggle.checked = preferences.soundEnabled;
   ui.briefingToggle.addEventListener("change", () => savePreference("showBriefing", ui.briefingToggle.checked));
   ui.weatherToggle.addEventListener("change", () => savePreference("reducedWeather", ui.weatherToggle.checked));
+  ui.soundToggle.addEventListener("change", () => {
+    savePreference("soundEnabled", ui.soundToggle.checked);
+    if (!preferences.soundEnabled && audioContext?.state === "running") void audioContext.suspend().catch(() => {});
+    if (preferences.soundEnabled) playCue("success");
+  });
 
   let last = performance.now();
   function frame(now) {

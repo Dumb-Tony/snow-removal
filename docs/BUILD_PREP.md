@@ -23,7 +23,7 @@
 - [x] World-map visualization of the connected access network.
 - [x] Gamepad API support matching the planned Unity action map.
 - [ ] Keyboard remapping and configurable gamepad bindings.
-- [ ] Audio feedback for blade, impact, low resource, and destination status.
+- [x] Dependency-free synthesized cues for blade, impact, low resource, NPC, destination, and outcome status.
 - [x] Seeded scenario selection, shareable query parameter, parked-car patterns, and deterministic reset.
 - [x] Dependency-free tests for seed stability, connectivity, access hysteresis, and score thresholds.
 - [x] Downloadable versioned JSON debrief for seeded playtest comparison.

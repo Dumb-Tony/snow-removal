@@ -162,6 +162,8 @@ Plow spray particles are presentation-only but originate from authoritative tran
 
 Audio carries machine state: engine load, tire slip, blade scrape, granular salt, snow hitting banks, hydraulic clunks, beacons, and muffled storm ambience. Music is sparse and reactive, giving way to radio chatter and vehicle rhythm. Co-op callouts duck nonessential audio. Accessibility provides visual equivalents for all critical cues.
 
+The browser slice uses restrained synthesized cues for system-state validation; these are functional placeholders, not final sound direction, and can be muted persistently.
+
 ## UI, UX, and accessibility
 
 - Minimal HUD: time, fuel, salt, destination access, score, blade state.
