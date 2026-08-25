@@ -181,7 +181,7 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 - [ ] Forward, reverse, and steering directions feel consistent.
 - [ ] Truck cannot leave map or pass through parked cars/buildings.
 - [ ] Blade raised leaves snow unchanged except weather.
-- [ ] Blade lowered transfers visible snow laterally while moving.
+- [x] Blade transfer conserves explicitly reported moved/lost mass and protects same-cell map edges.
 - [ ] Salt does nothing at zero inventory and never becomes negative.
 - [ ] Fuel does not become negative; depot restores resources.
 
@@ -204,7 +204,7 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 
 ## File-level next implementation tasks
 
-1. `app.js`: extract the remaining pure snow-transfer function and add mass-conservation tests.
+1. `core.js`: tune transfer retention/capacity using exported playtest mass totals.
 2. `app.js`: tune the visible connected-network overlay and passable-depth threshold from playtests.
 3. `app.js`: tune destination hysteresis thresholds and dispatch wording from playtests.
 4. `app.js`: add configurable keyboard/gamepad bindings and controller-specific button glyphs.

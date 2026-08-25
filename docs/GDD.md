@@ -61,7 +61,7 @@ Review outcomes, pay costs, retain town consequences, repair equipment, choose u
 
 ### Snow
 
-The world uses a spatial snow-depth field. Weather adds depth over time. A lowered plow samples cells under the blade, removes a percentage, and deposits most of that volume to a lateral discharge location. A small loss represents compaction and visual simplification. Deep snow increases drag and reduces steering authority.
+The world uses a spatial snow-depth field. Weather adds depth over time. A lowered plow samples cells under the blade, removes a percentage, and deposits most of that volume to a lateral discharge location. A small explicitly measured loss represents compaction, bank-capacity overflow, and visual simplification. Deep snow increases drag and reduces steering authority. Browser debriefs export moved/lost totals for tuning this abstraction.
 
 Browser v0.1 uses a 40 px grid rendered as translucent blue-white cells. The full game should use terrain-aligned snow tiles or a compute-driven height/coverage field, with separate loose, packed, slush, and ice components.
 

@@ -9,7 +9,7 @@
   const COLS = W / CELL;
   const ROWS = H / CELL;
   const SHIFT_SECONDS = 180;
-  const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, createDebrief } = window.SnowCore;
+  const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, createDebrief } = window.SnowCore;
 
   const SCENARIOS = [
     { id: "steady", name: "Steady Start", seed: 117, brief: "A routine afternoon storm is building. Open the three civic routes before accumulation outruns the crew.", baseSnow: 0.38, snowVariance: 0.24, stormBase: 0.38, gustScale: 0.34, salt: 100, parking: 0, npcDelay: 42 },
@@ -219,7 +219,7 @@
       npc: { x: 900, y: 300, w: 42, h: 20, active: false, completed: false, status: "MOVING", incidents: 0, delaySeconds: 0 },
       spray: [],
       weather: { intensity: scenario.stormBase, gust: 0, visibility: 1 },
-      metrics: { collisions: 0, harm: 0, access: 0, score: 0 },
+      metrics: { collisions: 0, harm: 0, access: 0, score: 0, snowMoved: 0, snowLost: 0 },
       resourceWarnings: { fuel: false, salt: false },
       events: [],
       logCooldown: 0,
@@ -356,14 +356,14 @@
       const sx = bladeX + rightX * offset;
       const sy = bladeY + rightY * offset;
       const source = snowIndexAt(sx, sy);
-      const removable = Math.min(state.snow[source], 1.7 * dt);
-      if (removable <= 0.002) continue;
-      state.snow[source] -= removable;
       const dx = sx + rightX * 48;
       const dy = sy + rightY * 48;
       const dest = snowIndexAt(dx, dy);
-      state.snow[dest] = Math.min(2.5, state.snow[dest] + removable * 0.9);
-      if (removable > 0.008 && state.spray.length < 90) {
+      const transfer = transferSnow(state.snow, source, dest, 1.7 * dt);
+      if (transfer.removed <= 0.002) continue;
+      state.metrics.snowMoved += transfer.deposited;
+      state.metrics.snowLost += transfer.lost;
+      if (transfer.removed > 0.008 && state.spray.length < 90) {
         const variance = noise2D(Math.floor(sx), Math.floor(sy), Math.floor(state.elapsed * 30) + state.scenario.seed);
         state.spray.push({
           x: sx,
@@ -591,7 +591,9 @@
       salt: state.truck.salt,
       returnedToDepot: pointInRect(state.truck.x, state.truck.y, depot),
       npcDelaySeconds: state.npc.delaySeconds,
-      npcIncidents: state.npc.incidents
+      npcIncidents: state.npc.incidents,
+      snowMoved: state.metrics.snowMoved,
+      snowLost: state.metrics.snowLost
     });
     ui.debrief.classList.remove("hidden");
     playCue(score >= 70 ? "success" : "warning");

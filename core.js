@@ -52,7 +52,18 @@
     return depth >= 0.86 ? "STUCK" : "MOVING";
   }
 
-  function createDebrief({ scenario, elapsed, access, harm, collisions, score, fuel, salt, returnedToDepot, npcDelaySeconds = 0, npcIncidents = 0, completedAt }) {
+  function transferSnow(field, source, destination, requested, { retention = 0.9, capacity = 2.5 } = {}) {
+    if (source === destination || requested <= 0) return { removed: 0, deposited: 0, lost: 0 };
+    const removed = Math.min(Math.max(0, field[source]), requested);
+    const depositTarget = removed * retention;
+    const room = Math.max(0, capacity - field[destination]);
+    const deposited = Math.min(room, depositTarget);
+    field[source] -= removed;
+    field[destination] += deposited;
+    return { removed, deposited, lost: removed - deposited };
+  }
+
+  function createDebrief({ scenario, elapsed, access, harm, collisions, score, fuel, salt, returnedToDepot, npcDelaySeconds = 0, npcIncidents = 0, snowMoved = 0, snowLost = 0, completedAt }) {
     return {
       format: "snow-removal-debrief-v1",
       completedAt: completedAt || new Date().toISOString(),
@@ -64,6 +75,8 @@
         collisions,
         npcDelaySeconds: Math.round(npcDelaySeconds),
         npcIncidents,
+        snowMoved: Number(snowMoved.toFixed(3)),
+        snowLost: Number(snowLost.toFixed(3)),
         score,
         fuelRemainingPercent: Math.round(fuel),
         saltRemainingPercent: Math.round(salt)
@@ -71,5 +84,5 @@
     };
   }
 
-  return { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, createDebrief };
+  return { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, createDebrief };
 });

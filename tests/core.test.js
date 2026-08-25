@@ -1,7 +1,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
-const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, createDebrief } = require("../core.js");
+const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, createDebrief } = require("../core.js");
 
 function test(name, fn) {
   try { fn(); console.log(`✓ ${name}`); }
@@ -36,6 +36,26 @@ test("NPC obstruction uses wide recovery hysteresis", () => {
   assert.equal(classifyNpcObstruction(0.4, "STUCK"), "MOVING");
 });
 
+test("plow transfer conserves reported snow mass", () => {
+  const field = new Float32Array([1, 0.2]);
+  const before = field[0] + field[1];
+  const result = transferSnow(field, 0, 1, 0.5);
+  const after = field[0] + field[1];
+  assert.ok(Math.abs(result.removed - 0.5) < 1e-6);
+  assert.ok(Math.abs(result.deposited - 0.45) < 1e-6);
+  assert.ok(Math.abs((before - after) - result.lost) < 1e-6);
+});
+
+test("plow transfer reports bank-capacity overflow and protects same-cell edges", () => {
+  const field = new Float32Array([1, 2.48]);
+  const overflow = transferSnow(field, 0, 1, 0.5);
+  assert.ok(overflow.deposited < 0.021);
+  assert.ok(overflow.lost > 0.47);
+  const unchanged = Array.from(field);
+  assert.deepEqual(transferSnow(field, 0, 0, 0.5), { removed: 0, deposited: 0, lost: 0 });
+  assert.deepEqual(Array.from(field), unchanged);
+});
+
 test("score rewards access and resources while charging harm", () => {
   assert.equal(scoreShift({ access: 1, fuel: 100, salt: 100, harm: 0, collisions: 0 }), 114);
   assert.equal(scoreShift({ access: 0.5, fuel: 50, salt: 50, harm: 8, collisions: 2 }), 43);
@@ -56,6 +76,8 @@ test("debrief export is stable, compact, and JSON-safe", () => {
     returnedToDepot: true,
     npcDelaySeconds: 12.6,
     npcIncidents: 1,
+    snowMoved: 2.34567,
+    snowLost: 0.12345,
     completedAt: "2026-08-25T00:00:00.000Z"
   });
   assert.equal(record.format, "snow-removal-debrief-v1");
@@ -63,6 +85,7 @@ test("debrief export is stable, compact, and JSON-safe", () => {
   assert.equal(record.outcome.placementHarm, 4.24);
   assert.equal(record.shift.returnedToDepot, true);
   assert.equal(record.outcome.npcDelaySeconds, 13);
+  assert.equal(record.outcome.snowMoved, 2.346);
   assert.doesNotThrow(() => JSON.stringify(record));
 });
 
