@@ -236,22 +236,60 @@
     }
   }
 
-  function averageZone(zone) {
+  function computeConnectedRoadCells() {
+    const connected = new Uint8Array(COLS * ROWS);
+    const queue = [];
+
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const wx = x * CELL + CELL / 2;
+        const wy = y * CELL + CELL / 2;
+        if (pointInRect(wx, wy, depot)) {
+          const idx = y * COLS + x;
+          connected[idx] = 1;
+          queue.push(idx);
+        }
+      }
+    }
+
+    for (let head = 0; head < queue.length; head++) {
+      const idx = queue[head];
+      const x = idx % COLS;
+      const y = Math.floor(idx / COLS);
+      const neighbors = [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]];
+
+      for (const [nx, ny] of neighbors) {
+        if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
+        const next = ny * COLS + nx;
+        if (connected[next]) continue;
+        const wx = nx * CELL + CELL / 2;
+        const wy = ny * CELL + CELL / 2;
+        if (!isRoad(wx, wy) || state.snow[next] >= 0.52) continue;
+        connected[next] = 1;
+        queue.push(next);
+      }
+    }
+    return connected;
+  }
+
+  function averageZone(zone, connected) {
     let open = 0;
     let total = 0;
     for (let y = zone.y + 10; y < zone.y + zone.h; y += 20) {
       for (let x = zone.x + 10; x < zone.x + zone.w; x += 20) {
         total++;
-        if (snowDepthAt(x, y) < 0.31) open++;
+        const idx = snowIndexAt(x, y);
+        if (state.snow[idx] < 0.31 && connected[idx]) open++;
       }
     }
     return total ? open / total : 0;
   }
 
   function updateAccess(silent = false) {
+    const connected = computeConnectedRoadCells();
     let accessSum = 0;
     destinations.forEach(d => {
-      d.access = averageZone(d.zone);
+      d.access = averageZone(d.zone, connected);
       accessSum += d.access;
       const status = d.access >= 0.7 ? "OPEN" : d.access >= 0.45 ? "STRAINED" : "BLOCKED";
       if (!silent && d.lastStatus && d.lastStatus !== status) {
@@ -523,4 +561,3 @@
   reset();
   requestAnimationFrame(frame);
 })();
-

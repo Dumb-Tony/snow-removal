@@ -14,7 +14,7 @@ Open `index.html` in a modern desktop browser. No server, install, or build step
 - Spread salt: `E`
 - Reset shift: `R`
 
-Clear the blue priority roads and keep access open to the fire station, clinic, and grocery store. Snow is pushed to the side of the blade rather than deleted, so careless passes can bury driveways and hydrants. Return to the depot before fuel runs out.
+Clear continuous routes from the Public Works Yard to the blue priority approaches at the fire station, clinic, and grocery store. Isolated clear patches do not count as civic access. Snow is pushed to the side of the blade rather than deleted, so careless passes can bury driveways and hydrants. Return to the depot before fuel runs out.
 
 ## Project documents
 

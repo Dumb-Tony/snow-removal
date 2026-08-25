@@ -19,7 +19,8 @@
 
 - [ ] First-shift guided prompts with dismissal and reduced-repeat mode.
 - [ ] Stronger blade-right discharge animation and temporary trajectory arc.
-- [ ] Mini-map route connectivity, not just approach averages.
+- [x] Depot-to-destination connectivity through passable snow cells.
+- [ ] Mini-map visualization of the connected access network.
 - [ ] Keyboard remapping and Gamepad API support.
 - [ ] Audio feedback for blade, impact, low resource, and destination status.
 - [ ] Seeded scenario selection and deterministic reset.
@@ -197,10 +198,9 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 ## File-level next implementation tasks
 
 1. `app.js`: extract pure snow-transfer, access, and score functions; add deterministic seed.
-2. `app.js`: add road-graph flood fill from depot and replace isolated approach scoring.
+2. `app.js`: visualize the connected access network and tune the passable-depth threshold.
 3. `app.js`: add destination-state hysteresis and dispatch event transitions.
 4. `app.js`: implement Gamepad API and a compact input-remap layer.
 5. `styles.css` / `index.html`: add onboarding and accessibility settings modal.
 6. `assets/`: add original engine/blade/salt/alert audio after interaction tuning.
 7. `tests/`: introduce a tiny no-dependency test harness or justify a dev-only runner.
-

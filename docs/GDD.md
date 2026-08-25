@@ -75,7 +75,7 @@ Snowfall continuously adds accumulation. Gust intensity oscillates, reducing con
 
 ### Traffic and access
 
-Destinations require a connected, sufficiently clear road corridor. Browser scoring approximates this with sampled approach zones. The full simulation uses a road graph with lane widths, obstruction weights, traffic agents, and emergency-response reachability.
+Destinations require a connected, sufficiently clear road corridor. Browser scoring flood-fills passable snow cells outward from the Public Works Yard and counts cleared destination-approach samples only when they join that network. The full simulation uses a road graph with lane widths, obstruction weights, traffic agents, and emergency-response reachability.
 
 ### Harmful placement
 
@@ -203,7 +203,7 @@ Top-level state domains:
 - `truck`: transform, velocity, steering, fuel, salt, blade, collision cooldown.
 - `snow`: grid dimensions, depth field, salt-treatment field.
 - `town`: roads, buildings, destinations, sensitive zones, obstacles, depot.
-- `metrics`: cleared priority samples, harmful placement, collisions, resource bonuses.
+- `metrics`: connected cleared priority samples, harmful placement, collisions, resource bonuses.
 
 Simulation order is input → vehicle dynamics → collision → plow displacement → salt treatment → snowfall → access/penalty sampling → phase transition → render. Scoring derives from state rather than being the source of truth.
 
@@ -236,7 +236,7 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 
 - **Snow readability:** Can players see transfer at driving speed without noisy overlays?
 - **Mass fidelity versus fun:** How much artificial loss/settling is acceptable before the pillar feels false?
-- **Route scoring:** A simple sampled corridor may reward disconnected clear patches; full graph reachability is preferable.
+- **Route scoring fidelity:** The browser grid now enforces depot connectivity, but cell resolution can still create abrupt access changes; the full road graph should support lane width and weighted obstruction.
 - **Handling:** Should the plow truck feel forgiving or demand deliberate countersteer under blade load?
 - **Griefing:** Co-op snow placement enables accidental and intentional sabotage; recovery tools and attribution must stay friendly.
 - **Persistence:** Long-lived banks add identity but can create unrecoverable seasons. The town needs scheduled hauling/reset valves.
@@ -260,7 +260,7 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 |---|---|---|---|
 | 2026-08-25 | Use a 40 px snow field in v0.1 | Makes displacement visible and computation cheap | M2 visual tuning |
 | 2026-08-25 | Deposit plowed snow on blade-right | Creates route-planning consequence with one input | Angled blades are added |
-| 2026-08-25 | Grade three approach zones rather than graph connectivity | Smallest complete scoring loop | M3 |
+| 2026-08-25 | Require cleared approach samples to connect to the depot through passable snow cells | Prevents isolated clean patches from scoring as usable civic access | Replace the browser grid with the Unity road graph |
 | 2026-08-25 | Allow depot drive-through resupply | Keeps a short shift moving | Economy prototype |
 | 2026-08-25 | Keep all implementation dependency-free | Direct file launch and easy handoff | A build tool solves a measured problem |
 | 2026-08-25 | Canonicalize at `C:\Dev\snow-removal` with public GitHub/Pages hosting | Gives the project durable version control and a frictionless friend playtest URL | Hosting or repository ownership changes |
@@ -269,7 +269,6 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 
 1. Tune snow accumulation, blade transfer, and access thresholds from five fresh-player runs.
 2. Add a short animated onboarding overlay and controller input.
-3. Replace destination-zone averages with depot-to-destination road-graph reachability.
-4. Add one recoverable NPC-stuck event caused by a bank crossing a lane threshold.
-5. Add seedable storm/parked-car scenarios and an exported debrief JSON.
-6. Prototype persistent bank carryover into a second shift.
+3. Add one recoverable NPC-stuck event caused by a bank crossing a lane threshold.
+4. Add seedable storm/parked-car scenarios and an exported debrief JSON.
+5. Prototype persistent bank carryover into a second shift.
