@@ -9,7 +9,7 @@
   const COLS = W / CELL;
   const ROWS = H / CELL;
   const SHIFT_SECONDS = 180;
-  const { noise2D, floodConnected, classifyAccess, scoreShift } = window.SnowCore;
+  const { noise2D, floodConnected, classifyAccess, scoreShift, createDebrief } = window.SnowCore;
 
   const SCENARIOS = [
     { id: "steady", name: "Steady Start", seed: 117, brief: "A routine afternoon storm is building. Open the three civic routes before accumulation outruns the crew.", baseSnow: 0.38, snowVariance: 0.24, stormBase: 0.38, gustScale: 0.34, salt: 100, parking: 0 },
@@ -38,7 +38,9 @@
     scenarioBrief: document.getElementById("scenarioBrief"),
     scenarioSelect: document.getElementById("scenarioSelect"),
     scenarioSeed: document.getElementById("scenarioSeed"),
-    controllerState: document.getElementById("controllerState")
+    controllerState: document.getElementById("controllerState"),
+    briefingToggle: document.getElementById("briefingToggle"),
+    weatherToggle: document.getElementById("weatherToggle")
   };
 
   const roads = [
@@ -101,7 +103,23 @@
   let parkedCars = parkingPatterns[SCENARIOS[scenarioIndex].parking];
   let previousGamepadButtons = [];
   let activeGamepadName = "";
+  const preferences = {
+    showBriefing: readPreference("showBriefing", true),
+    reducedWeather: readPreference("reducedWeather", false)
+  };
   let state;
+
+  function readPreference(name, fallback) {
+    try {
+      const value = localStorage.getItem(`snow-removal:${name}`);
+      return value === null ? fallback : value === "true";
+    } catch { return fallback; }
+  }
+
+  function savePreference(name, value) {
+    preferences[name] = value;
+    try { localStorage.setItem(`snow-removal:${name}`, String(value)); } catch { /* file-mode privacy settings may block storage */ }
+  }
 
   function readControls() {
     const keyboardThrottle = (keys.has("KeyW") || keys.has("ArrowUp") ? 1 : 0) - (keys.has("KeyS") || keys.has("ArrowDown") ? 1 : 0);
@@ -155,7 +173,7 @@
     sensitive.forEach(s => { s.buried = false; });
     destinations.forEach(d => { d.access = 0; d.lastStatus = ""; });
     state = {
-      phase: "ready",
+      phase: preferences.showBriefing ? "ready" : "active",
       elapsed: 0,
       snow,
       treated,
@@ -170,13 +188,14 @@
     addEvent("Dispatch: open the clinic, market, and Station 2.");
     addEvent("Snow leaves the blade on your right. Mind the amber zones.", true);
     ui.debrief.classList.add("hidden");
-    ui.intro.classList.remove("hidden");
+    ui.intro.classList.toggle("hidden", !preferences.showBriefing);
     ui.scenarioBrief.textContent = scenario.brief;
     ui.scenarioSelect.value = scenario.id;
     ui.scenarioSeed.textContent = `Seed ${scenario.seed} · ${parkedCars.length} parked cars`;
     const url = new URL(location.href);
     url.searchParams.set("scenario", scenario.id);
     history.replaceState(null, "", url);
+    if (!preferences.showBriefing) addEvent(`${scenario.name}: shift clock started.`);
     updateAccess(true);
     updateHud();
   }
@@ -414,7 +433,29 @@
       ? "Bellwether can still reach what matters. The next crew will inherit a manageable town."
       : "Critical access remains unreliable. Dispatch has called in another crew to recover the routes.";
     ui.stats.innerHTML = `<span><b>${Math.round(state.metrics.access * 100)}%</b>access</span><span><b>${state.metrics.harm.toFixed(0)}</b>placement harm</span><span><b>${state.metrics.collisions}</b>impacts</span><span><b>${score}</b>score</span>`;
+    state.debrief = createDebrief({
+      scenario: state.scenario,
+      elapsed: state.elapsed,
+      access: state.metrics.access,
+      harm: state.metrics.harm,
+      collisions: state.metrics.collisions,
+      score,
+      fuel: state.truck.fuel,
+      salt: state.truck.salt,
+      returnedToDepot: pointInRect(state.truck.x, state.truck.y, depot)
+    });
     ui.debrief.classList.remove("hidden");
+  }
+
+  function downloadDebrief() {
+    if (!state.debrief) return;
+    const blob = new Blob([JSON.stringify(state.debrief, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `snow-removal-${state.scenario.id}-${state.scenario.seed}-debrief.json`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   function drawBuilding(b) {
@@ -575,11 +616,13 @@
 
   function drawWeather() {
     const gust = state.weather.gust;
-    ctx.fillStyle = `rgba(220,240,248,${(1 - state.weather.visibility) * .32})`;
+    const visualScale = preferences.reducedWeather ? 0.35 : 1;
+    ctx.fillStyle = `rgba(220,240,248,${(1 - state.weather.visibility) * .32 * visualScale})`;
     ctx.fillRect(0, 0, W, H);
     ctx.strokeStyle = `rgba(255,255,255,${.22 + gust * .32})`;
     ctx.lineWidth = 1.3;
-    for (let i = 0; i < 58; i++) {
+    const flakeCount = preferences.reducedWeather ? 20 : 58;
+    for (let i = 0; i < flakeCount; i++) {
       const x = (i * 173 + state.elapsed * (35 + gust * 70)) % (W + 40) - 20;
       const y = (i * 97 + state.elapsed * 63) % (H + 30) - 15;
       ctx.beginPath();
@@ -634,9 +677,14 @@
   window.addEventListener("keyup", e => keys.delete(e.code));
   window.addEventListener("blur", () => { keys.clear(); pressed.clear(); });
   document.getElementById("restartButton").addEventListener("click", reset);
+  document.getElementById("downloadDebrief").addEventListener("click", downloadDebrief);
   document.getElementById("startButton").addEventListener("click", beginShift);
   ui.scenarioSelect.innerHTML = SCENARIOS.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
   ui.scenarioSelect.addEventListener("change", () => reset(SCENARIOS.findIndex(s => s.id === ui.scenarioSelect.value)));
+  ui.briefingToggle.checked = preferences.showBriefing;
+  ui.weatherToggle.checked = preferences.reducedWeather;
+  ui.briefingToggle.addEventListener("change", () => savePreference("showBriefing", ui.briefingToggle.checked));
+  ui.weatherToggle.addEventListener("change", () => savePreference("reducedWeather", ui.weatherToggle.checked));
 
   let last = performance.now();
   function frame(now) {

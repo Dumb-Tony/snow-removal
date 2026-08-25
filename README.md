@@ -43,3 +43,5 @@ This is a systems proof, not a content-complete game. The truck uses readable ar
 ## Verification
 
 Run the dependency-free rule checks with `node tests/core.test.js`. The test suite covers seeded snow generation, connected-route flood fill, access-state hysteresis, and civic scoring.
+
+The end-of-shift screen can download a compact JSON debrief for structured playtest comparison. Presentation preferences for repeat briefings and reduced weather visuals stay in the player's browser and do not alter the simulation.

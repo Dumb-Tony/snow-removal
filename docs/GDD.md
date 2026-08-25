@@ -168,6 +168,7 @@ Audio carries machine state: engine load, tire slip, blade scrape, granular salt
 - The browser slice supports the Gamepad API using the planned Unity action semantics.
 - Assist options: extended shift, gentler fuel use, route guidance, automatic blade height, pause-and-plan solo mode.
 - Text avoids tiny overlays; essential messages persist in an event log.
+- Browser presentation preferences can suppress repeat briefings and reduce visual snowfall without changing accumulation or score.
 
 ## Replayability and content generation
 
@@ -276,5 +277,5 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 1. Tune snow accumulation, blade transfer, and access thresholds from five fresh-player runs.
 2. Add controller input and a reduced-repeat briefing option.
 3. Add one recoverable NPC-stuck event caused by a bank crossing a lane threshold.
-4. Add exported debrief JSON for comparing seeded playtests.
+4. Collect structured debrief JSON from playtests and tune scenario thresholds.
 5. Prototype persistent bank carryover into a second shift.

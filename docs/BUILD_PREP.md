@@ -26,6 +26,8 @@
 - [ ] Audio feedback for blade, impact, low resource, and destination status.
 - [x] Seeded scenario selection, shareable query parameter, parked-car patterns, and deterministic reset.
 - [x] Dependency-free tests for seed stability, connectivity, access hysteresis, and score thresholds.
+- [x] Downloadable versioned JSON debrief for seeded playtest comparison.
+- [x] Persistent repeat-briefing and reduced-weather presentation preferences.
 
 ### P2 — Systems proof
 
@@ -195,7 +197,7 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 - [x] Inputs clear when window loses focus.
 - [ ] Labels/icons distinguish route, depot, destination, and hazard without color.
 - [ ] HUD remains readable at 200% browser zoom.
-- [ ] Reduced-motion/low-visibility assist is documented for M2.
+- [x] Reduced-weather visual assist leaves simulation difficulty unchanged.
 
 ## File-level next implementation tasks
 
@@ -203,6 +205,6 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 2. `app.js`: tune the visible connected-network overlay and passable-depth threshold from playtests.
 3. `app.js`: tune destination hysteresis thresholds and dispatch wording from playtests.
 4. `app.js`: add configurable keyboard/gamepad bindings and controller-specific button glyphs.
-5. `styles.css` / `index.html`: add onboarding and accessibility settings modal.
+5. `styles.css` / `index.html`: expand the inline accessibility preferences into remappable settings.
 6. `assets/`: add original engine/blade/salt/alert audio after interaction tuning.
 7. `tests/`: add browser smoke automation and snow-mass invariants without adding runtime dependencies.

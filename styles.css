@@ -74,6 +74,9 @@ kbd { display: inline-block; padding: 2px 6px; border: 1px solid #557080; border
 .blade-state.raised { border-color: #637b88; color: #8da1ac; }
 .controller-state { margin-top: 10px; color: #708894; font-size: .61rem; font-weight: 800; letter-spacing: .1em; text-align: center; }
 .controller-state.connected { color: var(--blue); }
+.preferences { display: grid; gap: 6px; margin-top: 10px; border-top: 1px solid var(--line); padding-top: 9px; }
+.preferences label { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: .68rem; }
+.preferences input { accent-color: var(--blue); }
 
 .debrief, .intro { position: absolute; inset: 8% 12%; display: grid; align-content: center; justify-items: center; padding: 30px; border: 1px solid #68808e; border-radius: 14px; background: #0d1920ee; box-shadow: 0 30px 90px #000b; text-align: center; backdrop-filter: blur(8px); }
 .debrief.hidden, .intro.hidden { display: none; }
@@ -91,6 +94,8 @@ kbd { display: inline-block; padding: 2px 6px; border: 1px solid #557080; border
 button { border: 0; border-radius: 7px; padding: 12px 18px; color: #082033; background: var(--blue); font: inherit; font-weight: 850; cursor: pointer; }
 button:hover { filter: brightness(1.12); }
 button kbd { margin-left: 8px; border-color: #2b759c; color: #082033; background: #ffffff55; }
+.debrief-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; }
+.secondary-button { border: 1px solid #557080; color: var(--ink); background: #1b303b; }
 
 @media (max-width: 1050px) {
   .game-grid { grid-template-columns: 1fr; }

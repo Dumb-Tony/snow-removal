@@ -47,6 +47,22 @@
     return Math.max(0, Math.round(accessPoints + resourceBonus - Math.max(0, harm) - Math.max(0, collisions) * 3));
   }
 
-  return { noise2D, floodConnected, classifyAccess, scoreShift };
-});
+  function createDebrief({ scenario, elapsed, access, harm, collisions, score, fuel, salt, returnedToDepot, completedAt }) {
+    return {
+      format: "snow-removal-debrief-v1",
+      completedAt: completedAt || new Date().toISOString(),
+      scenario: { id: scenario.id, name: scenario.name, seed: scenario.seed },
+      shift: { elapsedSeconds: Math.round(elapsed), returnedToDepot: Boolean(returnedToDepot) },
+      outcome: {
+        civicAccessPercent: Math.round(access * 100),
+        placementHarm: Number(harm.toFixed(2)),
+        collisions,
+        score,
+        fuelRemainingPercent: Math.round(fuel),
+        saltRemainingPercent: Math.round(salt)
+      }
+    };
+  }
 
+  return { noise2D, floodConnected, classifyAccess, scoreShift, createDebrief };
+});

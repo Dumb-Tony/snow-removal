@@ -1,7 +1,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
-const { noise2D, floodConnected, classifyAccess, scoreShift } = require("../core.js");
+const { noise2D, floodConnected, classifyAccess, scoreShift, createDebrief } = require("../core.js");
 
 function test(name, fn) {
   try { fn(); console.log(`✓ ${name}`); }
@@ -36,5 +36,24 @@ test("score rewards access and resources while charging harm", () => {
   assert.equal(scoreShift({ access: 0, fuel: 0, salt: 0, harm: 99, collisions: 9 }), 0);
 });
 
-console.log("All SnowCore tests passed.");
+test("debrief export is stable, compact, and JSON-safe", () => {
+  const record = createDebrief({
+    scenario: { id: "steady", name: "Steady Start", seed: 117 },
+    elapsed: 179.6,
+    access: 0.745,
+    harm: 4.236,
+    collisions: 1,
+    score: 77,
+    fuel: 52.4,
+    salt: 61.8,
+    returnedToDepot: true,
+    completedAt: "2026-08-25T00:00:00.000Z"
+  });
+  assert.equal(record.format, "snow-removal-debrief-v1");
+  assert.equal(record.outcome.civicAccessPercent, 75);
+  assert.equal(record.outcome.placementHarm, 4.24);
+  assert.equal(record.shift.returnedToDepot, true);
+  assert.doesNotThrow(() => JSON.stringify(record));
+});
 
+console.log("All SnowCore tests passed.");

@@ -36,7 +36,10 @@
           <div id="debriefGrade" class="grade">B</div>
           <p id="debriefSummary"></p>
           <div id="debriefStats" class="debrief-stats"></div>
-          <button id="restartButton" type="button">Start another shift <kbd>R</kbd></button>
+          <div class="debrief-actions">
+            <button id="restartButton" type="button">Start another shift <kbd>R</kbd></button>
+            <button id="downloadDebrief" class="secondary-button" type="button">Download debrief JSON</button>
+          </div>
         </div>
       </div>
 
@@ -82,6 +85,10 @@
           <p><kbd>Gamepad</kbd> RT/LT drive · A blade · X salt</p>
           <div id="controllerState" class="controller-state">NO CONTROLLER DETECTED</div>
           <div id="bladeState" class="blade-state raised">BLADE RAISED</div>
+          <div class="preferences">
+            <label><input id="briefingToggle" type="checkbox" checked> Show briefing after reset</label>
+            <label><input id="weatherToggle" type="checkbox"> Reduce weather visuals</label>
+          </div>
         </section>
       </aside>
     </section>
