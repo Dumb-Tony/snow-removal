@@ -19,6 +19,17 @@
     <section class="game-grid">
       <div class="canvas-wrap">
         <canvas id="game" width="960" height="600" aria-label="Top-down snow plow game"></canvas>
+        <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+          <p class="eyebrow">PUBLIC WORKS BRIEFING</p>
+          <h2 id="introTitle">Keep Bellwether connected</h2>
+          <p id="scenarioBrief" class="intro-copy"></p>
+          <div class="briefing-grid">
+            <article><b>1 · Open routes</b><span>Clear continuous roads from the yard to each blue destination.</span></article>
+            <article><b>2 · Place the bank</b><span>The blade throws snow right. Keep amber driveways and hydrants clear.</span></article>
+            <article><b>3 · Mind supplies</b><span>Salt treats stubborn snow. Drive through the green yard to resupply.</span></article>
+          </div>
+          <button id="startButton" type="button">Begin shift <kbd>Enter</kbd></button>
+        </div>
         <div id="debrief" class="debrief hidden" role="dialog" aria-modal="true" aria-labelledby="debriefTitle">
           <p class="eyebrow">SHIFT DEBRIEF</p>
           <h2 id="debriefTitle">Town status</h2>
@@ -30,6 +41,11 @@
       </div>
 
       <aside class="panel" aria-label="Shift status">
+        <label class="scenario-card" for="scenarioSelect">
+          <span>STORM SCENARIO</span>
+          <select id="scenarioSelect" aria-label="Storm scenario"></select>
+          <small id="scenarioSeed">Seed 117</small>
+        </label>
         <div class="time-card">
           <span>SHIFT CLOCK</span>
           <strong id="timeValue">03:00</strong>
@@ -62,12 +78,13 @@
           <p><kbd>Space</kbd> Toggle blade</p>
           <p><kbd>E</kbd> Hold to salt</p>
           <p><kbd>R</kbd> Reset shift</p>
+          <p><kbd>N</kbd> Next scenario</p>
           <div id="bladeState" class="blade-state raised">BLADE RAISED</div>
         </section>
       </aside>
     </section>
   </main>
+  <script src="core.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
-

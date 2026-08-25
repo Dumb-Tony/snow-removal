@@ -73,6 +73,8 @@ Salt reduces local snow/ice and suppresses near-term accumulation. In the full g
 
 Snowfall continuously adds accumulation. Gust intensity oscillates, reducing contrast and increasing accumulation rate. Future weather adds wind-driven redistribution, temperature crossings, freezing rain, and forecast uncertainty.
 
+The browser slice ships three deterministic scenario presets: **Steady Start** teaches the base loop, **Lake-Effect Push** increases depth and resource pressure, and **Event Night** adds a denser parked-car pattern. Scenario IDs are shareable through the URL.
+
 ### Traffic and access
 
 Destinations require a connected, sufficiently clear road corridor. Browser scoring flood-fills passable snow cells outward from the Public Works Yard and counts cleared destination-approach samples only when they join that network. The full simulation uses a road graph with lane widths, obstruction weights, traffic agents, and emergency-response reachability.
@@ -183,6 +185,7 @@ Replay comes from systemic combinations: storm track, temperature curve, parked-
 - Three priority destinations with approach-clearance scoring.
 - Sensitive roadside zones for driveways and hydrants.
 - Shift timer, event log, graded score, win/lose debrief, restart.
+- Paused dispatch briefing, deterministic scenario selector, and shareable scenario URL.
 
 ### Explicitly excluded
 
@@ -198,7 +201,7 @@ Performance target: stable 60 fps on a typical desktop browser at 960×600; simu
 
 Top-level state domains:
 
-- `shift`: phase, elapsed, duration, score, events, outcome.
+- `shift`: phase, scenario/seed, elapsed, duration, score, events, outcome.
 - `weather`: intensity, gust, visibility, accumulation rate.
 - `truck`: transform, velocity, steering, fuel, salt, blade, collision cooldown.
 - `snow`: grid dimensions, depth field, salt-treatment field.
@@ -264,11 +267,13 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 | 2026-08-25 | Allow depot drive-through resupply | Keeps a short shift moving | Economy prototype |
 | 2026-08-25 | Keep all implementation dependency-free | Direct file launch and easy handoff | A build tool solves a measured problem |
 | 2026-08-25 | Canonicalize at `C:\Dev\snow-removal` with public GitHub/Pages hosting | Gives the project durable version control and a frictionless friend playtest URL | Hosting or repository ownership changes |
+| 2026-08-25 | Ship three deterministic scenarios through data presets and URL IDs | Adds replayable pressure variation without procedural-map scope | Scenario telemetry shows insufficient variety |
+| 2026-08-25 | Pause the clock behind a short dispatch briefing | Teaches the central placement tradeoff without consuming shift time | Repeat-player friction becomes measurable |
 
 ## Next implementation tasks
 
 1. Tune snow accumulation, blade transfer, and access thresholds from five fresh-player runs.
-2. Add a short animated onboarding overlay and controller input.
+2. Add controller input and a reduced-repeat briefing option.
 3. Add one recoverable NPC-stuck event caused by a bank crossing a lane threshold.
-4. Add seedable storm/parked-car scenarios and an exported debrief JSON.
+4. Add exported debrief JSON for comparing seeded playtests.
 5. Prototype persistent bank carryover into a second shift.

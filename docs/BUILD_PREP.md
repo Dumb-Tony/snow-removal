@@ -17,14 +17,14 @@
 
 ### P1 — Legibility and tuning
 
-- [ ] First-shift guided prompts with dismissal and reduced-repeat mode.
+- [x] First-shift briefing with paused clock and scenario-specific dispatch context.
 - [ ] Stronger blade-right discharge animation and temporary trajectory arc.
 - [x] Depot-to-destination connectivity through passable snow cells.
-- [ ] Mini-map visualization of the connected access network.
+- [x] World-map visualization of the connected access network.
 - [ ] Keyboard remapping and Gamepad API support.
 - [ ] Audio feedback for blade, impact, low resource, and destination status.
-- [ ] Seeded scenario selection and deterministic reset.
-- [ ] Automated simulation tests for snow conservation and score thresholds.
+- [x] Seeded scenario selection, shareable query parameter, parked-car patterns, and deterministic reset.
+- [x] Dependency-free tests for seed stability, connectivity, access hysteresis, and score thresholds.
 
 ### P2 — Systems proof
 
@@ -86,6 +86,7 @@
 | Toggle plow | Space | Edge-triggered; switches raised/lowered |
 | Spread salt | E | Hold; consumes salt and treats cells behind truck |
 | Reset shift | R | Edge-triggered; restores initial state |
+| Next scenario | N | Edge-triggered; advances the deterministic scenario and returns to READY |
 
 Planned controller mapping: RT throttle, LT brake/reverse, left stick steering, A blade toggle, X salt, Menu pause.
 
@@ -99,7 +100,7 @@ Planned controller mapping: RT throttle, LT brake/reverse, left stick steering, 
 - ACTIVE: timer, weather, resources, scoring, and vehicle simulate.
 - DEBRIEF: simulation freezes; final metrics shown; reset returns READY.
 
-Current v0.1 starts directly in ACTIVE to minimize friction; READY becomes an onboarding overlay in M2.
+The current slice enters READY behind a concise briefing. The shift clock remains paused until the player presses Enter, clicks Begin Shift, or provides a driving/tool input.
 
 ### Truck
 
@@ -114,7 +115,7 @@ Current v0.1 starts directly in ACTIVE to minimize friction; READY becomes an on
 
 `BLOCKED (<45%) → STRAINED (45–69%) → OPEN (≥70%)`
 
-Access is the proportion of sampled approach cells at or below the clear-depth threshold. Hysteresis should be added before audio/dispatch reactions.
+Access is the proportion of sampled approach cells at or below the clear-depth threshold and connected to the yard. Hysteresis suppresses dispatch chatter around status thresholds.
 
 ### Sensitive zone
 
@@ -164,9 +165,9 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 
 ### Smoke
 
-- [ ] Open from disk; canvas and HUD render.
+- [x] Open from disk; canvas and HUD render.
 - [ ] Complete a shift using WASD only plus Space/E.
-- [ ] Reset during play and after debrief.
+- [x] Reset during play and after debrief.
 - [ ] Resize window below and above canvas width.
 
 ### Vehicle and tools
@@ -189,18 +190,18 @@ The v0.1 code stays in one `app.js` so it can launch via `file://` without modul
 
 ### Robustness and accessibility
 
-- [ ] No console errors after tabbing away for 30 seconds.
-- [ ] Inputs clear when window loses focus.
+- [x] No console errors during scenario/reset/onboarding browser smoke test.
+- [x] Inputs clear when window loses focus.
 - [ ] Labels/icons distinguish route, depot, destination, and hazard without color.
 - [ ] HUD remains readable at 200% browser zoom.
 - [ ] Reduced-motion/low-visibility assist is documented for M2.
 
 ## File-level next implementation tasks
 
-1. `app.js`: extract pure snow-transfer, access, and score functions; add deterministic seed.
-2. `app.js`: visualize the connected access network and tune the passable-depth threshold.
-3. `app.js`: add destination-state hysteresis and dispatch event transitions.
+1. `app.js`: extract the remaining pure snow-transfer function and add mass-conservation tests.
+2. `app.js`: tune the visible connected-network overlay and passable-depth threshold from playtests.
+3. `app.js`: tune destination hysteresis thresholds and dispatch wording from playtests.
 4. `app.js`: implement Gamepad API and a compact input-remap layer.
 5. `styles.css` / `index.html`: add onboarding and accessibility settings modal.
 6. `assets/`: add original engine/blade/salt/alert audio after interaction tuning.
-7. `tests/`: introduce a tiny no-dependency test harness or justify a dev-only runner.
+7. `tests/`: add browser smoke automation and snow-mass invariants without adding runtime dependencies.

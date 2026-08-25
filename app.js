@@ -9,6 +9,13 @@
   const COLS = W / CELL;
   const ROWS = H / CELL;
   const SHIFT_SECONDS = 180;
+  const { noise2D, floodConnected, classifyAccess, scoreShift } = window.SnowCore;
+
+  const SCENARIOS = [
+    { id: "steady", name: "Steady Start", seed: 117, brief: "A routine afternoon storm is building. Open the three civic routes before accumulation outruns the crew.", baseSnow: 0.38, snowVariance: 0.24, stormBase: 0.38, gustScale: 0.34, salt: 100, parking: 0 },
+    { id: "lake-effect", name: "Lake-Effect Push", seed: 382, brief: "A narrow lake-effect band has settled over town. Snow is deeper, gusts are stronger, and the hopper starts partially used.", baseSnow: 0.48, snowVariance: 0.3, stormBase: 0.52, gustScale: 0.46, salt: 76, parking: 1 },
+    { id: "event-night", name: "Event Night", seed: 911, brief: "Downtown parking is packed during a fast-moving squall. Work precise lines and protect the clinic approach.", baseSnow: 0.42, snowVariance: 0.27, stormBase: 0.45, gustScale: 0.38, salt: 88, parking: 2 }
+  ];
 
   const ui = {
     time: document.getElementById("timeValue"),
@@ -26,7 +33,11 @@
     debrief: document.getElementById("debrief"),
     grade: document.getElementById("debriefGrade"),
     summary: document.getElementById("debriefSummary"),
-    stats: document.getElementById("debriefStats")
+    stats: document.getElementById("debriefStats"),
+    intro: document.getElementById("intro"),
+    scenarioBrief: document.getElementById("scenarioBrief"),
+    scenarioSelect: document.getElementById("scenarioSelect"),
+    scenarioSeed: document.getElementById("scenarioSeed")
   };
 
   const roads = [
@@ -61,47 +72,62 @@
     { x: 858, y: 515, r: 21, type: "HYDRANT", buried: false }
   ];
 
-  const parkedCars = [
+  const parkingPatterns = [[
     { x: 334, y: 106, w: 42, h: 21, c: "#b95e59" },
     { x: 606, y: 315, w: 43, h: 21, c: "#d6a84a" },
     { x: 135, y: 370, w: 22, h: 43, c: "#5b91aa" },
     { x: 781, y: 206, w: 22, h: 43, c: "#a183bd" },
     { x: 338, y: 475, w: 43, h: 21, c: "#739667" }
-  ];
+  ], [
+    { x: 265, y: 140, w: 43, h: 21, c: "#b95e59" },
+    { x: 650, y: 275, w: 43, h: 21, c: "#d6a84a" },
+    { x: 175, y: 365, w: 22, h: 43, c: "#5b91aa" },
+    { x: 765, y: 190, w: 22, h: 43, c: "#a183bd" },
+    { x: 560, y: 472, w: 43, h: 21, c: "#739667" }
+  ], [
+    { x: 300, y: 105, w: 42, h: 21, c: "#b95e59" },
+    { x: 390, y: 145, w: 43, h: 21, c: "#d6a84a" },
+    { x: 605, y: 305, w: 43, h: 21, c: "#5b91aa" },
+    { x: 780, y: 210, w: 22, h: 43, c: "#a183bd" },
+    { x: 260, y: 470, w: 43, h: 21, c: "#739667" },
+    { x: 470, y: 350, w: 22, h: 43, c: "#c06f52" }
+  ]];
 
   const keys = new Set();
   const pressed = new Set();
+  const requestedScenario = new URLSearchParams(location.search).get("scenario");
+  let scenarioIndex = Math.max(0, SCENARIOS.findIndex(s => s.id === requestedScenario));
+  let parkedCars = parkingPatterns[SCENARIOS[scenarioIndex].parking];
   let state;
-
-  function seededNoise(x, y) {
-    const n = Math.sin(x * 91.17 + y * 47.83 + 1.234) * 43758.5453;
-    return n - Math.floor(n);
-  }
 
   function isRoad(x, y) {
     return roads.some(r => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) ||
       (x >= depot.x && x <= depot.x + depot.w && y >= depot.y && y <= depot.y + depot.h);
   }
 
-  function reset() {
+  function reset(nextScenario = scenarioIndex) {
+    scenarioIndex = (nextScenario + SCENARIOS.length) % SCENARIOS.length;
+    const scenario = SCENARIOS[scenarioIndex];
+    parkedCars = parkingPatterns[scenario.parking];
     const snow = new Float32Array(COLS * ROWS);
     const treated = new Float32Array(COLS * ROWS);
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
         const wx = x * CELL + CELL / 2;
         const wy = y * CELL + CELL / 2;
-        snow[y * COLS + x] = isRoad(wx, wy) ? 0.42 + seededNoise(x, y) * 0.26 : 0.72;
+        snow[y * COLS + x] = isRoad(wx, wy) ? scenario.baseSnow + noise2D(x, y, scenario.seed) * scenario.snowVariance : 0.72;
       }
     }
     sensitive.forEach(s => { s.buried = false; });
     destinations.forEach(d => { d.access = 0; d.lastStatus = ""; });
     state = {
-      phase: "active",
+      phase: "ready",
       elapsed: 0,
       snow,
       treated,
-      truck: { x: 145, y: 505, angle: -Math.PI / 2, speed: 0, fuel: 100, salt: 100, blade: false, hitTimer: 0 },
-      weather: { intensity: 0.56, gust: 0, visibility: 1 },
+      scenario,
+      truck: { x: 145, y: 505, angle: -Math.PI / 2, speed: 0, fuel: 100, salt: scenario.salt, blade: false, hitTimer: 0, leftDepot: false },
+      weather: { intensity: scenario.stormBase, gust: 0, visibility: 1 },
       metrics: { collisions: 0, harm: 0, access: 0, score: 0 },
       events: [],
       logCooldown: 0,
@@ -110,8 +136,22 @@
     addEvent("Dispatch: open the clinic, market, and Station 2.");
     addEvent("Snow leaves the blade on your right. Mind the amber zones.", true);
     ui.debrief.classList.add("hidden");
+    ui.intro.classList.remove("hidden");
+    ui.scenarioBrief.textContent = scenario.brief;
+    ui.scenarioSelect.value = scenario.id;
+    ui.scenarioSeed.textContent = `Seed ${scenario.seed} · ${parkedCars.length} parked cars`;
+    const url = new URL(location.href);
+    url.searchParams.set("scenario", scenario.id);
+    history.replaceState(null, "", url);
     updateAccess(true);
     updateHud();
+  }
+
+  function beginShift() {
+    if (state.phase !== "ready") return;
+    state.phase = "active";
+    ui.intro.classList.add("hidden");
+    addEvent(`${state.scenario.name}: shift clock started.`);
   }
 
   function addEvent(text, warn = false) {
@@ -176,7 +216,9 @@
     }
     t.hitTimer -= dt;
 
-    if (pointInRect(t.x, t.y, depot)) {
+    const inDepot = pointInRect(t.x, t.y, depot);
+    if (!inDepot) t.leftDepot = true;
+    if (inDepot && t.leftDepot) {
       t.fuel = Math.min(100, t.fuel + 24 * dt);
       t.salt = Math.min(100, t.salt + 34 * dt);
       if (state.resupplyCooldown <= 0 && (t.fuel < 99 || t.salt < 99)) {
@@ -226,7 +268,7 @@
   function updateWeather(dt) {
     const w = state.weather;
     w.gust = (Math.sin(state.elapsed * 0.16) + Math.sin(state.elapsed * 0.051 + 2)) * 0.25 + 0.5;
-    w.intensity = 0.42 + w.gust * 0.38;
+    w.intensity = state.scenario.stormBase + w.gust * state.scenario.gustScale;
     w.visibility = 1 - w.gust * 0.28;
     const amount = w.intensity * 0.0052 * dt;
     for (let i = 0; i < state.snow.length; i++) {
@@ -237,39 +279,27 @@
   }
 
   function computeConnectedRoadCells() {
-    const connected = new Uint8Array(COLS * ROWS);
-    const queue = [];
+    const starts = [];
 
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
         const wx = x * CELL + CELL / 2;
         const wy = y * CELL + CELL / 2;
         if (pointInRect(wx, wy, depot)) {
-          const idx = y * COLS + x;
-          connected[idx] = 1;
-          queue.push(idx);
+          starts.push(y * COLS + x);
         }
       }
     }
-
-    for (let head = 0; head < queue.length; head++) {
-      const idx = queue[head];
-      const x = idx % COLS;
-      const y = Math.floor(idx / COLS);
-      const neighbors = [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]];
-
-      for (const [nx, ny] of neighbors) {
-        if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
-        const next = ny * COLS + nx;
-        if (connected[next]) continue;
+    return floodConnected({
+      cols: COLS,
+      rows: ROWS,
+      starts,
+      isPassable: (next, nx, ny) => {
         const wx = nx * CELL + CELL / 2;
         const wy = ny * CELL + CELL / 2;
-        if (!isRoad(wx, wy) || state.snow[next] >= 0.52) continue;
-        connected[next] = 1;
-        queue.push(next);
+        return isRoad(wx, wy) && state.snow[next] < 0.52;
       }
-    }
-    return connected;
+    });
   }
 
   function averageZone(zone, connected) {
@@ -287,11 +317,12 @@
 
   function updateAccess(silent = false) {
     const connected = computeConnectedRoadCells();
+    state.connected = connected;
     let accessSum = 0;
     destinations.forEach(d => {
       d.access = averageZone(d.zone, connected);
       accessSum += d.access;
-      const status = d.access >= 0.7 ? "OPEN" : d.access >= 0.45 ? "STRAINED" : "BLOCKED";
+      const status = classifyAccess(d.access, d.lastStatus);
       if (!silent && d.lastStatus && d.lastStatus !== status) {
         addEvent(`${d.name}: access ${status.toLowerCase()}.`, status !== "OPEN");
       }
@@ -309,13 +340,17 @@
 
     state.metrics.access = accessSum / destinations.length;
     state.metrics.harm = harm;
-    const accessPoints = state.metrics.access * 100;
-    const resourceBonus = (state.truck.fuel + state.truck.salt) * 0.07;
-    state.metrics.score = Math.max(0, Math.round(accessPoints + resourceBonus - harm - state.metrics.collisions * 3));
+    state.metrics.score = scoreShift({ access: state.metrics.access, fuel: state.truck.fuel, salt: state.truck.salt, harm, collisions: state.metrics.collisions });
   }
 
   function update(dt) {
-    if (pressed.has("KeyR")) reset();
+    if (pressed.has("KeyR")) { reset(); pressed.clear(); return; }
+    if (pressed.has("KeyN")) { reset(scenarioIndex + 1); pressed.clear(); return; }
+    if (state.phase === "ready") {
+      const startsShift = ["Enter", "Space", "KeyW", "KeyS", "KeyA", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyE"].some(code => pressed.has(code));
+      if (startsShift) beginShift();
+      else { pressed.clear(); return; }
+    }
     if (state.phase !== "active") { pressed.clear(); return; }
     if (pressed.has("Space")) {
       state.truck.blade = !state.truck.blade;
@@ -454,6 +489,22 @@
     });
   }
 
+  function drawConnectivity() {
+    if (!state.connected) return;
+    ctx.strokeStyle = "rgba(98, 183, 232, .28)";
+    ctx.lineWidth = 1.5;
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const idx = y * COLS + x;
+        if (!state.connected[idx]) continue;
+        const cx = x * CELL + CELL / 2;
+        const cy = y * CELL + CELL / 2;
+        if (!isRoad(cx, cy)) continue;
+        ctx.strokeRect(x * CELL + 5, y * CELL + 5, CELL - 10, CELL - 10);
+      }
+    }
+  }
+
   function drawTruck() {
     const t = state.truck;
     ctx.save();
@@ -508,6 +559,7 @@
   function render() {
     drawWorld();
     drawSnow();
+    drawConnectivity();
     drawCars();
     drawTruck();
     drawWeather();
@@ -518,7 +570,7 @@
     const mins = Math.floor(remaining / 60);
     const secs = Math.floor(remaining % 60);
     ui.time.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-    ui.storm.textContent = state.weather.gust > .68 ? "GUSTING · LOW VISIBILITY" : "STEADY SNOW";
+    ui.storm.textContent = `${state.scenario.name.toUpperCase()} · ${state.weather.gust > .68 ? "LOW VISIBILITY" : "ACTIVE"}`;
     ui.access.textContent = `${Math.round(state.metrics.access * 100)}%`;
     ui.fuelMeter.value = state.truck.fuel;
     ui.fuel.textContent = `${Math.round(state.truck.fuel)}%`;
@@ -532,7 +584,7 @@
     ui.destinations.innerHTML = destinations.map(d => {
       const pct = Math.round(d.access * 100);
       const cls = pct >= 70 ? "" : pct >= 45 ? "strained" : "blocked";
-      const status = pct >= 70 ? "OPEN" : pct >= 45 ? "STRAINED" : "BLOCKED";
+      const status = d.lastStatus || classifyAccess(d.access);
       return `<div class="destination"><div class="destination-line"><span>${d.icon} · ${d.name}</span><b>${status} ${pct}%</b></div><div class="bar"><i class="${cls}" style="width:${pct}%"></i></div></div>`;
     }).join("");
     ui.log.innerHTML = state.events.map(e => `<li class="${e.warn ? "warn" : ""}">${e.text}</li>`).join("");
@@ -547,6 +599,9 @@
   window.addEventListener("keyup", e => keys.delete(e.code));
   window.addEventListener("blur", () => { keys.clear(); pressed.clear(); });
   document.getElementById("restartButton").addEventListener("click", reset);
+  document.getElementById("startButton").addEventListener("click", beginShift);
+  ui.scenarioSelect.innerHTML = SCENARIOS.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+  ui.scenarioSelect.addEventListener("change", () => reset(SCENARIOS.findIndex(s => s.id === ui.scenarioSelect.value)));
 
   let last = performance.now();
   function frame(now) {

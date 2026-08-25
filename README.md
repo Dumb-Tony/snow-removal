@@ -8,11 +8,14 @@ A no-build Canvas prototype about keeping a small town moving during an active s
 
 Open `index.html` in a modern desktop browser. No server, install, or build step is required.
 
+Choose one of three deterministic storm scenarios from the sidebar, or share a specific scenario with `?scenario=steady`, `?scenario=lake-effect`, or `?scenario=event-night`.
+
 - Drive: `WASD` or arrow keys
 - Brake/reverse: `S` / down arrow
 - Toggle plow: `Space`
 - Spread salt: `E`
 - Reset shift: `R`
+- Next scenario: `N`
 
 Clear continuous routes from the Public Works Yard to the blue priority approaches at the fire station, clinic, and grocery store. Isolated clear patches do not count as civic access. Snow is pushed to the side of the blade rather than deleted, so careless passes can bury driveways and hydrants. Return to the depot before fuel runs out.
 
@@ -34,3 +37,7 @@ Clear continuous routes from the Public Works Yard to the blue priority approach
 ## Current prototype boundaries
 
 This is a systems proof, not a content-complete game. The truck uses readable arcade handling; snow is simulated on a low-resolution field; collision geometry is intentionally simple; and the browser slice is solo-only while its systems and data are organized for eventual co-op migration.
+
+## Verification
+
+Run the dependency-free rule checks with `node tests/core.test.js`. The test suite covers seeded snow generation, connected-route flood fill, access-state hysteresis, and civic scoring.
