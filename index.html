@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SNOW REMOVAL — Bellwether Shift</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">BELLWETHER PUBLIC WORKS · ACTIVE STORM</p>
+        <h1>SNOW REMOVAL</h1>
+      </div>
+      <div class="storm-chip"><span aria-hidden="true">❄</span> <span id="stormLabel">STEADY SNOW</span></div>
+    </header>
+
+    <section class="game-grid">
+      <div class="canvas-wrap">
+        <canvas id="game" width="960" height="600" aria-label="Top-down snow plow game"></canvas>
+        <div id="debrief" class="debrief hidden" role="dialog" aria-modal="true" aria-labelledby="debriefTitle">
+          <p class="eyebrow">SHIFT DEBRIEF</p>
+          <h2 id="debriefTitle">Town status</h2>
+          <div id="debriefGrade" class="grade">B</div>
+          <p id="debriefSummary"></p>
+          <div id="debriefStats" class="debrief-stats"></div>
+          <button id="restartButton" type="button">Start another shift <kbd>R</kbd></button>
+        </div>
+      </div>
+
+      <aside class="panel" aria-label="Shift status">
+        <div class="time-card">
+          <span>SHIFT CLOCK</span>
+          <strong id="timeValue">03:00</strong>
+        </div>
+
+        <section>
+          <div class="section-heading"><h2>Civic access</h2><strong id="accessTotal">0%</strong></div>
+          <div id="destinations" class="destination-list"></div>
+        </section>
+
+        <section class="gauges">
+          <div class="gauge-row"><span>Fuel</span><meter id="fuelMeter" min="0" max="100" value="100"></meter><b id="fuelValue">100%</b></div>
+          <div class="gauge-row"><span>Salt</span><meter id="saltMeter" min="0" max="100" value="100"></meter><b id="saltValue">100%</b></div>
+        </section>
+
+        <section class="score-card">
+          <span>LIVE CIVIC SCORE</span>
+          <strong id="scoreValue">0</strong>
+          <small id="harmValue">No blocked access points</small>
+        </section>
+
+        <section>
+          <h2>Dispatch</h2>
+          <ol id="eventLog" class="event-log" aria-live="polite"></ol>
+        </section>
+
+        <section class="controls">
+          <h2>Controls</h2>
+          <p><kbd>WASD</kbd> / <kbd>Arrows</kbd> Drive</p>
+          <p><kbd>Space</kbd> Toggle blade</p>
+          <p><kbd>E</kbd> Hold to salt</p>
+          <p><kbd>R</kbd> Reset shift</p>
+          <div id="bladeState" class="blade-state raised">BLADE RAISED</div>
+        </section>
+      </aside>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
+

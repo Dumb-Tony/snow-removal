@@ -1,0 +1,206 @@
+# SNOW REMOVAL — Build Preparation
+
+## Prioritized prototype backlog
+
+### P0 — First playable
+
+- [x] No-build HTML/CSS/Canvas shell.
+- [x] Arcade truck steering, forward/reverse, road containment, obstacle collision.
+- [x] Lowerable blade that transfers snow to one side.
+- [x] Continuous snowfall with gust/visibility variation.
+- [x] Fuel and salt resources; depot resupply.
+- [x] Parked-car obstacles.
+- [x] Three destination approach zones and civic-access score.
+- [x] Driveway/hydrant sensitive zones and harmful-placement penalty.
+- [x] Shift timer, event log, end-state debrief, restart.
+- [x] Living GDD and decision log.
+
+### P1 — Legibility and tuning
+
+- [ ] First-shift guided prompts with dismissal and reduced-repeat mode.
+- [ ] Stronger blade-right discharge animation and temporary trajectory arc.
+- [ ] Mini-map route connectivity, not just approach averages.
+- [ ] Keyboard remapping and Gamepad API support.
+- [ ] Audio feedback for blade, impact, low resource, and destination status.
+- [ ] Seeded scenario selection and deterministic reset.
+- [ ] Automated simulation tests for snow conservation and score thresholds.
+
+### P2 — Systems proof
+
+- [ ] Packed snow/ice state and temperature-driven refreeze.
+- [ ] One NPC car that can become stuck or trapped.
+- [ ] Tow interaction and recoverable obstruction.
+- [ ] Second vehicle/AI helper interface.
+- [ ] Persistent two-shift aftermath.
+- [ ] Repair cost and simple seasonal budget mock.
+
+### P3 — Unity migration spikes
+
+- [ ] Import map/zone JSON into ScriptableObjects.
+- [ ] 3D surface-chunk snow transfer benchmark.
+- [ ] Two-player host-authoritative vehicle and snow delta test.
+- [ ] Controller-first cab/exterior camera test.
+
+## Milestone plan
+
+| Milestone | Deliverable | Exit signal |
+|---|---|---|
+| M0 Design-ready | Documents, scope, architecture, scaffold | Another developer can implement without unresolved fundamentals |
+| M1 Functional loop | Current browser v0.1 | One complete shift is playable from file open to debrief |
+| M2 Readable slice | Onboarding, tuning, sound, controller | 4/5 new players explain access versus placement tradeoff |
+| M3 Durable systems | Seeds, NPC incident, persistence mock | Two shifts produce distinct, recoverable aftermath stories |
+| M4 Unity proof | 3D/network spikes | Two clients observe consistent useful snow state |
+
+## Vertical-slice acceptance criteria
+
+### Required behavior
+
+1. `index.html` opens directly in current Chrome, Edge, and Firefox without a server.
+2. Player can drive, reverse, steer, toggle blade, spread salt, and restart.
+3. Snow accumulates during the shift and visibly reduces under a lowered moving blade.
+4. Most cleared snow reappears beside the truck's pass.
+5. At least three marked destinations report changing access values.
+6. Placing snow on a marked driveway/hydrant produces an amber warning and score harm.
+7. Parked cars block the truck and impose a small collision penalty.
+8. Fuel and salt decrease from relevant actions; depot restores both.
+9. A 4-minute-or-shorter shift ends in a debrief with access, harm, and resource components.
+10. Reset returns all mutable state to a fresh, playable shift.
+
+### Quality thresholds
+
+- Controls are discoverable without opening documentation.
+- Critical state never depends on color alone.
+- No uncaught console errors during two full shifts.
+- Update loop survives a background-tab pause without a simulation jump.
+- A player can earn both a passing and failing result through understandable choices.
+- Average frame time remains under 33 ms on a typical integrated-GPU laptop.
+
+## Initial controls specification
+
+| Action | Keyboard | State/behavior |
+|---|---|---|
+| Throttle | W / Up | Accelerates along heading while held |
+| Brake/reverse | S / Down | Brakes forward motion, then reverses |
+| Steer left/right | A/D or Left/Right | Steering authority scales with speed; reduced in deep snow |
+| Toggle plow | Space | Edge-triggered; switches raised/lowered |
+| Spread salt | E | Hold; consumes salt and treats cells behind truck |
+| Reset shift | R | Edge-triggered; restores initial state |
+
+Planned controller mapping: RT throttle, LT brake/reverse, left stick steering, A blade toggle, X salt, Menu pause.
+
+## State-machine specifications
+
+### Shift
+
+`READY → ACTIVE → DEBRIEF`
+
+- READY: static instructions; first movement or tool input enters ACTIVE.
+- ACTIVE: timer, weather, resources, scoring, and vehicle simulate.
+- DEBRIEF: simulation freezes; final metrics shown; reset returns READY.
+
+Current v0.1 starts directly in ACTIVE to minimize friction; READY becomes an onboarding overlay in M2.
+
+### Truck
+
+`OPERABLE ↔ COLLISION_STUN`, with orthogonal blade state `RAISED | LOWERED`.
+
+- OPERABLE accepts motion/tool input.
+- COLLISION_STUN applies bounce and suppresses repeat penalties for 0.6 seconds.
+- Fuel at zero keeps steering/braking but removes positive drive torque.
+- Entering depot triggers resupply with a short message cooldown.
+
+### Destination access
+
+`BLOCKED (<45%) → STRAINED (45–69%) → OPEN (≥70%)`
+
+Access is the proportion of sampled approach cells at or below the clear-depth threshold. Hysteresis should be added before audio/dispatch reactions.
+
+### Sensitive zone
+
+`CLEAR (<risk depth) → AT_RISK → BURIED (≥buried depth)`
+
+Penalty is derived continuously from excess depth, while events fire only on state transitions to avoid message spam.
+
+## Suggested production module structure
+
+```text
+snow-removal/
+  index.html
+  styles.css
+  src/
+    main.js
+    config.js
+    input.js
+    simulation/
+      shift.js
+      vehicle.js
+      snow-field.js
+      weather.js
+      access.js
+      scoring.js
+    world/
+      bellwether-map.js
+      collision.js
+    presentation/
+      renderer.js
+      hud.js
+      audio.js
+    data/
+      scenarios.js
+      vehicles.js
+  tests/
+    snow-field.test.js
+    access.test.js
+    scoring.test.js
+  docs/
+    GDD.md
+    BUILD_PREP.md
+```
+
+The v0.1 code stays in one `app.js` so it can launch via `file://` without module/CORS inconsistencies. Split it when automated tests or a local dev server are introduced.
+
+## Test and QA checklist
+
+### Smoke
+
+- [ ] Open from disk; canvas and HUD render.
+- [ ] Complete a shift using WASD only plus Space/E.
+- [ ] Reset during play and after debrief.
+- [ ] Resize window below and above canvas width.
+
+### Vehicle and tools
+
+- [ ] Forward, reverse, and steering directions feel consistent.
+- [ ] Truck cannot leave map or pass through parked cars/buildings.
+- [ ] Blade raised leaves snow unchanged except weather.
+- [ ] Blade lowered transfers visible snow laterally while moving.
+- [ ] Salt does nothing at zero inventory and never becomes negative.
+- [ ] Fuel does not become negative; depot restores resources.
+
+### Snow and scoring
+
+- [ ] Snow accumulates across all exposed cells.
+- [ ] Priority access improves after a clean pass.
+- [ ] A right-side bank can bury a marked sensitive zone.
+- [ ] Clearing a buried zone reduces its live penalty.
+- [ ] Score components reconcile with displayed final score.
+- [ ] Deep snow creates more drag than a clear road.
+
+### Robustness and accessibility
+
+- [ ] No console errors after tabbing away for 30 seconds.
+- [ ] Inputs clear when window loses focus.
+- [ ] Labels/icons distinguish route, depot, destination, and hazard without color.
+- [ ] HUD remains readable at 200% browser zoom.
+- [ ] Reduced-motion/low-visibility assist is documented for M2.
+
+## File-level next implementation tasks
+
+1. `app.js`: extract pure snow-transfer, access, and score functions; add deterministic seed.
+2. `app.js`: add road-graph flood fill from depot and replace isolated approach scoring.
+3. `app.js`: add destination-state hysteresis and dispatch event transitions.
+4. `app.js`: implement Gamepad API and a compact input-remap layer.
+5. `styles.css` / `index.html`: add onboarding and accessibility settings modal.
+6. `assets/`: add original engine/blade/salt/alert audio after interaction tuning.
+7. `tests/`: introduce a tiny no-dependency test harness or justify a dev-only runner.
+
