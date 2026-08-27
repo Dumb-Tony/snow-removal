@@ -756,9 +756,9 @@
 
   function drawWorld() {
     const ground = ctx.createLinearGradient(0, 0, W, H);
-    ground.addColorStop(0, "#496068");
-    ground.addColorStop(.5, "#3b5057");
-    ground.addColorStop(1, "#2f444b");
+    ground.addColorStop(0, "#dce8e9");
+    ground.addColorStop(.52, "#c7d7da");
+    ground.addColorStop(1, "#aebfc4");
     ctx.fillStyle = ground;
     ctx.fillRect(0, 0, W, H);
 
@@ -766,7 +766,9 @@
       const x = (i * 137) % W;
       const y = (i * 83 + 37) % H;
       const r = 5 + (i % 9) * 2;
-      ctx.fillStyle = `rgba(232, 243, 245, ${.018 + (i % 4) * .008})`;
+      ctx.fillStyle = i % 3 === 0
+        ? `rgba(255, 255, 255, ${.08 + (i % 4) * .018})`
+        : `rgba(111, 145, 155, ${.025 + (i % 4) * .01})`;
       ctx.beginPath();
       ctx.ellipse(x, y, r * 1.7, r, (i % 5) * .25, 0, Math.PI * 2);
       ctx.fill();
@@ -886,10 +888,10 @@
         const d = state.snow[idx];
         const variation = noise2D(x, y, state.scenario.seed);
         const pixel = idx * 4;
-        surface.data[pixel] = 220 + Math.round(variation * 22);
-        surface.data[pixel + 1] = 235 + Math.round(variation * 15);
-        surface.data[pixel + 2] = 240 + Math.round(variation * 13);
-        surface.data[pixel + 3] = Math.min(232, Math.round(54 + d * 132));
+        surface.data[pixel] = 235 + Math.round(variation * 16);
+        surface.data[pixel + 1] = 244 + Math.round(variation * 10);
+        surface.data[pixel + 2] = 248 + Math.round(variation * 7);
+        surface.data[pixel + 3] = Math.min(255, Math.round(45 + Math.sqrt(d) * 300));
       }
     }
     snowSurfaceCtx.putImageData(surface, 0, 0);

@@ -282,6 +282,7 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 | 2026-08-25 | Pause the clock behind a short dispatch briefing | Teaches the central placement tradeoff without consuming shift time | Repeat-player friction becomes measurable |
 | 2026-08-27 | Replace debug-board primitives with a code-native dimensional Canvas art pass | The coarse grid and flat rectangles obscured the intended grounded municipal fantasy | Player feedback identifies a stronger target style or 3D production begins |
 | 2026-08-27 | Smooth visual snow independently from the authoritative 40 px field | Preserves fast deterministic mechanics while hiding tile boundaries | Snow readability or performance regresses |
+| 2026-08-27 | Keep ground snow bright and make road-snow opacity nonlinear | The first visual pass compressed snow, pavement, and haze into one gray value range; snow must read before players understand the simulation | Cleared asphalt or plow paths lose readability |
 
 ## Next implementation tasks
 
