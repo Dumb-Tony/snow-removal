@@ -1,7 +1,7 @@
 # SNOW REMOVAL — Living Game Design Document
 
-**Status:** Browser vertical slice v0.2
-**Last updated:** 2026-08-25
+**Status:** Browser vertical slice v0.3 visual pass
+**Last updated:** 2026-08-27
 **North star:** Every cleared road should leave a new problem somewhere else.
 
 ## Premise
@@ -156,7 +156,7 @@ The full town is assembled from authored districts connected by a road graph. Ea
 
 Stylized low-poly 3D with chunky vehicle silhouettes, readable attachment geometry, warm window light, sodium streetlamps, and a restrained civic color palette. Snow depth and compaction must read at driving speed. Hazard colors are consistent: blue for priority/access, amber for placement risk, red for immediate obstruction, green for resources/depot.
 
-The browser slice uses a clean diagrammatic town: charcoal roads, warm buildings, blue priority markings, amber-sensitive edges, and layered snow cells. It is a systems instrument, not a promise of final rendering.
+The browser slice now uses a stylized, softly dimensional town: continuous asphalt, raised curb blocks, snow-capped roofs, warm windows, evergreen silhouettes, streetlight pools, shaded vehicles, and a vignetted active storm. Snow is rendered as a bilinearly smoothed surface rather than visible simulation tiles; genuinely deep cells gain shaped banks. Blue route/access and amber-sensitive markers remain deliberately graphic so the simulation stays legible.
 
 Plow spray particles are presentation-only but originate from authoritative transfer samples, making the blade-right discharge direction readable without inventing snow volume.
 
@@ -280,6 +280,8 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 | 2026-08-25 | Canonicalize at `C:\Dev\snow-removal` with public GitHub/Pages hosting | Gives the project durable version control and a frictionless friend playtest URL | Hosting or repository ownership changes |
 | 2026-08-25 | Ship three deterministic scenarios through data presets and URL IDs | Adds replayable pressure variation without procedural-map scope | Scenario telemetry shows insufficient variety |
 | 2026-08-25 | Pause the clock behind a short dispatch briefing | Teaches the central placement tradeoff without consuming shift time | Repeat-player friction becomes measurable |
+| 2026-08-27 | Replace debug-board primitives with a code-native dimensional Canvas art pass | The coarse grid and flat rectangles obscured the intended grounded municipal fantasy | Player feedback identifies a stronger target style or 3D production begins |
+| 2026-08-27 | Smooth visual snow independently from the authoritative 40 px field | Preserves fast deterministic mechanics while hiding tile boundaries | Snow readability or performance regresses |
 
 ## Next implementation tasks
 

@@ -2,11 +2,11 @@
 
 **Playable build:** https://dumb-tony.github.io/snow-removal/  
 **Target time:** 12–18 minutes  
-**Build line:** Browser vertical slice v0.2
+**Build line:** Browser vertical slice v0.3 visual pass
 
 ## What this playtest is testing
 
-The build is not testing final art, full vehicle physics, multiplayer, or content volume. It is testing whether one central idea creates satisfying decisions:
+The build is not testing final 3D art, full vehicle physics, multiplayer, or content volume. It is testing whether the new visual language makes one central idea readable and satisfying:
 
 > Clearing a road helps the town, but the snow must go somewhere and can create a new problem.
 
@@ -36,6 +36,7 @@ Please answer briefly; concrete moments are more useful than general ratings.
 5. Which information did you look for but could not find?
 6. Did steering, blade control, salt, or resupply behave differently than expected?
 7. Would you voluntarily play another scenario? Why or why not?
+8. Which part of the town still looks like a prototype rather than a place?
 
 Optional: download the JSON debrief from the end screen and attach it to the notes. It contains scenario/seed, shift number, civic access, placement harm, NPC delay, resource remainder, and snow moved/lost. It contains no personal information or telemetry.
 
@@ -51,10 +52,9 @@ Optional: download the JSON debrief from the end screen and attach it to the not
 
 ## Known limitations
 
-- Top-down arcade handling is a systems stand-in for the eventual 3D truck.
+- The stylized top-down town and arcade handling remain stand-ins for the eventual 3D game, but now establish the intended grounded, wintry, municipal tone.
 - Snow uses a coarse 40 px field and can change access status abruptly at cell boundaries.
 - The delivery van follows one fixed road and has deliberately simple behavior.
 - Audio cues are synthesized placeholders.
 - Browser aftermath preserves snow only when explicitly chosen at debrief; it is not a season save.
 - Keyboard bindings are not yet remappable.
-
