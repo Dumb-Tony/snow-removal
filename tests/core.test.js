@@ -1,7 +1,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
-const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, createDebrief } = require("../core.js");
+const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, applySnowfall, createDebrief } = require("../core.js");
 
 function test(name, fn) {
   try { fn(); console.log(`✓ ${name}`); }
@@ -65,6 +65,22 @@ test("aftermath carryover settles loose snow without erasing banks or mutating h
   assert.ok(carried[1] < original[1]);
   assert.ok(carried[2] > 1.3);
   assert.ok(carried[3] > 2.4);
+});
+
+test("steady snowfall leaves a freshly cleared route viable for a full shift", () => {
+  const field = new Float32Array([0]);
+  const treated = new Float32Array([0]);
+  applySnowfall(field, treated, { intensity: 0.55, rate: 0.0022, dt: 180 });
+  assert.ok(field[0] > 0.2);
+  assert.ok(field[0] < 0.31);
+});
+
+test("salt treatment suppresses accumulation and expires safely", () => {
+  const field = new Float32Array([0]);
+  const treated = new Float32Array([1]);
+  applySnowfall(field, treated, { intensity: 0.55, rate: 0.0022, dt: 1 });
+  assert.ok(field[0] < 0.001);
+  assert.ok(treated[0] < 1 && treated[0] > 0);
 });
 
 test("score rewards access and resources while charging harm", () => {

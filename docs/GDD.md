@@ -283,10 +283,11 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 | 2026-08-27 | Replace debug-board primitives with a code-native dimensional Canvas art pass | The coarse grid and flat rectangles obscured the intended grounded municipal fantasy | Player feedback identifies a stronger target style or 3D production begins |
 | 2026-08-27 | Smooth visual snow independently from the authoritative 40 px field | Preserves fast deterministic mechanics while hiding tile boundaries | Snow readability or performance regresses |
 | 2026-08-27 | Keep ground snow bright and make road-snow opacity nonlinear | The first visual pass compressed snow, pavement, and haze into one gray value range; snow must read before players understand the simulation | Cleared asphalt or plow paths lose readability |
+| 2026-08-27 | Reduce continuous accumulation by roughly half and tune it per scenario | A cleared route was becoming blocked again faster than one truck could service the three priorities; pressure should demand choices without erasing progress | Fresh-player runs consistently finish with idle time or no need to revisit routes |
 
 ## Next implementation tasks
 
-1. Tune snow accumulation, blade transfer, and access thresholds from five fresh-player runs.
+1. Validate the new per-scenario snowfall rates and access thresholds across five fresh-player runs.
 2. Add controller input and a reduced-repeat briefing option.
 3. Tune the recoverable delivery-van incident and add obstruction attribution to the debrief.
 4. Collect structured debrief JSON from playtests and tune scenario thresholds.

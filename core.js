@@ -72,6 +72,16 @@
     return carried;
   }
 
+  function applySnowfall(field, treated, { intensity, rate, dt, capacity = 2.5, treatmentShield = 0.75, treatmentDecay = 0.035 }) {
+    const amount = Math.max(0, intensity) * Math.max(0, rate) * Math.max(0, dt);
+    for (let i = 0; i < field.length; i++) {
+      const shield = Math.max(0, Math.min(1, treated[i])) * treatmentShield;
+      field[i] = Math.min(capacity, field[i] + amount * (1 - shield));
+      treated[i] = Math.max(0, treated[i] - treatmentDecay * dt);
+    }
+    return amount;
+  }
+
   function createDebrief({ scenario, townCycle = 1, elapsed, access, harm, collisions, score, fuel, salt, returnedToDepot, npcDelaySeconds = 0, npcIncidents = 0, snowMoved = 0, snowLost = 0, completedAt }) {
     return {
       format: "snow-removal-debrief-v1",
@@ -93,5 +103,5 @@
     };
   }
 
-  return { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, createDebrief };
+  return { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, applySnowfall, createDebrief };
 });

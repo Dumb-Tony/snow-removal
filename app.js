@@ -15,12 +15,12 @@
   const snowSurfaceImage = snowSurfaceCtx.createImageData(COLS, ROWS);
   const QA_MODE = new URLSearchParams(location.search).get("qa") === "1";
   const SHIFT_SECONDS = QA_MODE ? 5 : 180;
-  const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, createDebrief } = window.SnowCore;
+  const { noise2D, floodConnected, classifyAccess, scoreShift, classifyNpcObstruction, transferSnow, carrySnowField, applySnowfall, createDebrief } = window.SnowCore;
 
   const SCENARIOS = [
-    { id: "steady", name: "Steady Start", seed: 117, brief: "A routine afternoon storm is building. Open the three civic routes before accumulation outruns the crew.", baseSnow: 0.38, snowVariance: 0.24, stormBase: 0.38, gustScale: 0.34, salt: 100, parking: 0, npcDelay: 42 },
-    { id: "lake-effect", name: "Lake-Effect Push", seed: 382, brief: "A narrow lake-effect band has settled over town. Snow is deeper, gusts are stronger, and the hopper starts partially used.", baseSnow: 0.48, snowVariance: 0.3, stormBase: 0.52, gustScale: 0.46, salt: 76, parking: 1, npcDelay: 24 },
-    { id: "event-night", name: "Event Night", seed: 911, brief: "Downtown parking is packed during a fast-moving squall. Work precise lines and protect the clinic approach.", baseSnow: 0.42, snowVariance: 0.27, stormBase: 0.45, gustScale: 0.38, salt: 88, parking: 2, npcDelay: 31 }
+    { id: "steady", name: "Steady Start", seed: 117, brief: "A routine afternoon storm is building. Open the three civic routes before accumulation outruns the crew.", baseSnow: 0.38, snowVariance: 0.24, stormBase: 0.38, gustScale: 0.34, snowfallRate: 0.0022, salt: 100, parking: 0, npcDelay: 42 },
+    { id: "lake-effect", name: "Lake-Effect Push", seed: 382, brief: "A narrow lake-effect band has settled over town. Snow is deeper, gusts are stronger, and the hopper starts partially used.", baseSnow: 0.48, snowVariance: 0.3, stormBase: 0.52, gustScale: 0.46, snowfallRate: 0.0027, salt: 76, parking: 1, npcDelay: 24 },
+    { id: "event-night", name: "Event Night", seed: 911, brief: "Downtown parking is packed during a fast-moving squall. Work precise lines and protect the clinic approach.", baseSnow: 0.42, snowVariance: 0.27, stormBase: 0.45, gustScale: 0.38, snowfallRate: 0.0024, salt: 88, parking: 2, npcDelay: 31 }
   ];
 
   const ui = {
@@ -432,12 +432,7 @@
     w.gust = (Math.sin(state.elapsed * 0.16) + Math.sin(state.elapsed * 0.051 + 2)) * 0.25 + 0.5;
     w.intensity = state.scenario.stormBase + w.gust * state.scenario.gustScale;
     w.visibility = 1 - w.gust * 0.28;
-    const amount = w.intensity * 0.0052 * dt;
-    for (let i = 0; i < state.snow.length; i++) {
-      const shield = state.treated[i] * 0.75;
-      state.snow[i] = Math.min(2.5, state.snow[i] + amount * (1 - shield));
-      state.treated[i] = Math.max(0, state.treated[i] - 0.035 * dt);
-    }
+    applySnowfall(state.snow, state.treated, { intensity: w.intensity, rate: state.scenario.snowfallRate, dt });
   }
 
   function updateNpc(dt) {
