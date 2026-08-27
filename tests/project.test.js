@@ -18,12 +18,13 @@ test("all local page assets exist", () => {
   const localReferences = references.filter(reference => !/^(?:https?:|#|data:)/.test(reference));
   assert.ok(localReferences.length >= 3);
   for (const reference of localReferences) {
-    assert.ok(fs.existsSync(path.join(root, reference)), `Missing page asset: ${reference}`);
+    const fileReference = reference.split(/[?#]/, 1)[0];
+    assert.ok(fs.existsSync(path.join(root, fileReference)), `Missing page asset: ${reference}`);
   }
 });
 
 test("the pure core loads before the browser application", () => {
-  assert.ok(html.indexOf('src="core.js"') < html.indexOf('src="app.js"'));
+  assert.ok(html.indexOf('src="core.js"') < html.search(/src="app\.js(?:[?#][^"]*)?"/));
 });
 
 test("every JavaScript DOM id exists in index.html", () => {
@@ -40,4 +41,3 @@ test("the standalone page has no external runtime dependency", () => {
 });
 
 console.log("All project-integrity tests passed.");
-

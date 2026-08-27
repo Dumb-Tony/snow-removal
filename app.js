@@ -756,9 +756,9 @@
 
   function drawWorld() {
     const ground = ctx.createLinearGradient(0, 0, W, H);
-    ground.addColorStop(0, "#dce8e9");
-    ground.addColorStop(.52, "#c7d7da");
-    ground.addColorStop(1, "#aebfc4");
+    ground.addColorStop(0, "#f4f8f7");
+    ground.addColorStop(.52, "#dce8e9");
+    ground.addColorStop(1, "#c7d8dc");
     ctx.fillStyle = ground;
     ctx.fillRect(0, 0, W, H);
 
@@ -785,8 +785,20 @@
     ctx.fillStyle = asphalt;
     roads.forEach(r => ctx.fillRect(r.x, r.y, r.w, r.h));
 
-    ctx.strokeStyle = "rgba(196, 213, 216, .42)";
-    ctx.lineWidth = 4;
+    ctx.save();
+    ctx.shadowColor = "rgba(74, 105, 116, .4)";
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetY = 3;
+    ctx.strokeStyle = "rgba(248, 252, 252, .9)";
+    ctx.lineWidth = 8;
+    townBlocks.forEach(block => {
+      roundedRectPath(block.x + 2, block.y + 2, block.w - 4, block.h - 4, 5);
+      ctx.stroke();
+    });
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(136, 164, 172, .5)";
+    ctx.lineWidth = 2;
     townBlocks.forEach(block => {
       roundedRectPath(block.x + 2, block.y + 2, block.w - 4, block.h - 4, 5);
       ctx.stroke();
@@ -891,7 +903,7 @@
         surface.data[pixel] = 235 + Math.round(variation * 16);
         surface.data[pixel + 1] = 244 + Math.round(variation * 10);
         surface.data[pixel + 2] = 248 + Math.round(variation * 7);
-        surface.data[pixel + 3] = Math.min(255, Math.round(45 + Math.sqrt(d) * 300));
+        surface.data[pixel + 3] = Math.min(255, Math.round(105 + Math.sqrt(d) * 330));
       }
     }
     snowSurfaceCtx.putImageData(surface, 0, 0);
@@ -1131,7 +1143,7 @@
     }
     const vignette = ctx.createRadialGradient(W / 2, H / 2, H * .3, W / 2, H / 2, H * .82);
     vignette.addColorStop(0, "rgba(3, 10, 14, 0)");
-    vignette.addColorStop(1, "rgba(3, 10, 14, .28)");
+    vignette.addColorStop(1, "rgba(3, 10, 14, .2)");
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, W, H);
   }
