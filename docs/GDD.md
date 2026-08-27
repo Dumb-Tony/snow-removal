@@ -1,6 +1,6 @@
 # SNOW REMOVAL — Living Game Design Document
 
-**Status:** Browser vertical slice v0.3 visual pass
+**Status:** Browser vertical slice v0.4 stylized 2.5D pass
 **Last updated:** 2026-08-27
 **North star:** Every cleared road should leave a new problem somewhere else.
 
@@ -8,7 +8,7 @@
 
 A municipal or contracted snow-removal crew keeps the small town of Bellwether functioning through escalating winter storms. Players plow, salt, tow, refuel, and improvise while snow continues to fall. Snow is matter: it moves, piles, blocks access, hides hazards, and later refreezes. The town remembers where it was left.
 
-The long-term game is a 2–5 player co-op 3D Unity title for Steam. The first proof is a standalone, top-down Canvas game focused on the core tradeoff: clear critical access without causing more harm through careless snow placement.
+The long-term game is a 2–5 player co-op 3D Unity title for Steam. The first proof is a standalone, oblique 2.5D Canvas game focused on the core tradeoff: clear critical access without causing more harm through careless snow placement.
 
 ## Player fantasy
 
@@ -156,7 +156,7 @@ The full town is assembled from authored districts connected by a road graph. Ea
 
 Stylized low-poly 3D with chunky vehicle silhouettes, readable attachment geometry, warm window light, sodium streetlamps, and a restrained civic color palette. Snow depth and compaction must read at driving speed. Hazard colors are consistent: blue for priority/access, amber for placement risk, red for immediate obstruction, green for resources/depot.
 
-The browser slice now uses a stylized, softly dimensional town: continuous asphalt, raised curb blocks, snow-capped roofs, warm windows, evergreen silhouettes, streetlight pools, shaded vehicles, and a vignetted active storm. Snow is rendered as a bilinearly smoothed surface rather than visible simulation tiles; genuinely deep cells gain shaped banks. Blue route/access and amber-sensitive markers remain deliberately graphic so the simulation stays legible.
+The browser slice uses a stylized 2.5D toy-town treatment rather than a flat overhead diagram: the whole town sits under an oblique camera; civic buildings have pitched roofs, visible front and side faces, warm windows, heavy silhouettes, and deep cast shadows; vehicles and evergreens are deliberately chunky. Snow is rendered as a bilinearly smoothed surface with wind-sculpted ridges and shaped deep banks rather than visible simulation tiles. Blue route/access and amber-sensitive markers remain deliberately graphic so the simulation stays legible.
 
 Plow spray particles are presentation-only but originate from authoritative transfer samples, making the blade-right discharge direction readable without inventing snow volume.
 
@@ -284,6 +284,7 @@ The slice succeeds if a new player can understand within one shift that (a) plow
 | 2026-08-27 | Smooth visual snow independently from the authoritative 40 px field | Preserves fast deterministic mechanics while hiding tile boundaries | Snow readability or performance regresses |
 | 2026-08-27 | Keep ground snow bright and make road-snow opacity nonlinear | The first visual pass compressed snow, pavement, and haze into one gray value range; snow must read before players understand the simulation | Cleared asphalt or plow paths lose readability |
 | 2026-08-27 | Reduce continuous accumulation by roughly half and tune it per scenario | A cleared route was becoming blocked again faster than one truck could service the three priorities; pressure should demand choices without erasing progress | Fresh-player runs consistently finish with idle time or no need to revisit routes |
+| 2026-08-27 | Shift the browser slice from overhead diagram to oblique 2.5D toy town | Pitched roofs, visible wall faces, chunky silhouettes, sculpted snow, and depth layering better preview the intended stylized Unity game without changing simulation coordinates | Projection obscures driving lines or the Unity camera target changes |
 
 ## Next implementation tasks
 

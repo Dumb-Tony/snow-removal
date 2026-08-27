@@ -8,6 +8,8 @@
   const CELL = 40;
   const COLS = W / CELL;
   const ROWS = H / CELL;
+  const WORLD_TILT = 0.86;
+  const WORLD_OFFSET_Y = 38;
   const snowSurface = document.createElement("canvas");
   snowSurface.width = COLS;
   snowSurface.height = ROWS;
@@ -655,25 +657,32 @@
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(s, s);
-    ctx.fillStyle = "rgba(8, 18, 23, .32)";
+    ctx.fillStyle = "rgba(26, 49, 54, .28)";
     ctx.beginPath();
-    ctx.ellipse(5, 16, 15, 7, 0, 0, Math.PI * 2);
+    ctx.ellipse(8, 18, 18, 8, -.12, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#172f32";
-    for (const [yy, width] of [[9, 13], [1, 11], [-7, 8]]) {
+    ctx.fillStyle = "#634c36";
+    roundedRectPath(-2.5, 3, 5, 18, 2);
+    ctx.fill();
+    for (const [yy, width, color] of [[10, 15, "#173e3b"], [1, 12, "#1d5148"], [-8, 9, "#29655a"]]) {
+      ctx.fillStyle = color;
       ctx.beginPath();
       ctx.moveTo(0, yy - 17);
       ctx.lineTo(-width, yy + 8);
       ctx.lineTo(width, yy + 8);
       ctx.closePath();
       ctx.fill();
-      ctx.strokeStyle = "rgba(226, 241, 244, .68)";
-      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = "rgba(255, 255, 255, .9)";
+      ctx.lineWidth = 2.8;
       ctx.beginPath();
       ctx.moveTo(-width + 2, yy + 5);
-      ctx.quadraticCurveTo(0, yy + 1, width - 2, yy + 5);
+      ctx.quadraticCurveTo(-1, yy + 1, width - 2, yy + 4);
       ctx.stroke();
     }
+    ctx.fillStyle = "rgba(255,255,255,.92)";
+    ctx.beginPath();
+    ctx.ellipse(-2, -12, 4, 2.2, -.2, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 
@@ -700,53 +709,96 @@
 
   function drawBuilding(b) {
     ctx.save();
-    ctx.shadowColor = "rgba(5, 12, 16, .55)";
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetY = 7;
-    roundedRectPath(b.x, b.y + 4, b.w, b.h - 4, 5);
-    ctx.fillStyle = b.wall;
-    ctx.fill();
-    ctx.shadowColor = "transparent";
+    const roofTop = b.y - 12;
+    const eaveY = b.y + 27;
+    const frontBottom = b.y + b.h + 11;
 
-    const roof = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h * .62);
-    roof.addColorStop(0, "#60717a");
-    roof.addColorStop(.14, b.roof);
-    roof.addColorStop(1, "#26363d");
-    roundedRectPath(b.x - 4, b.y - 3, b.w + 8, b.h * .56, 6);
-    ctx.fillStyle = roof;
-    ctx.fill();
-    ctx.strokeStyle = "rgba(10, 20, 24, .55)";
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(242, 249, 250, .8)";
+    ctx.fillStyle = "rgba(18, 42, 49, .28)";
     ctx.beginPath();
-    ctx.moveTo(b.x - 2, b.y - 2);
-    ctx.quadraticCurveTo(b.x + b.w * .25, b.y + 3, b.x + b.w * .48, b.y - 1);
-    ctx.quadraticCurveTo(b.x + b.w * .72, b.y + 4, b.x + b.w + 2, b.y);
-    ctx.lineTo(b.x + b.w + 3, b.y + 6);
-    ctx.quadraticCurveTo(b.x + b.w * .65, b.y + 10, b.x - 3, b.y + 6);
+    ctx.ellipse(b.x + b.w * .55, frontBottom + 8, b.w * .55, 13, -.03, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "rgba(20, 34, 40, .78)";
+    ctx.beginPath();
+    ctx.moveTo(b.x + b.w, eaveY);
+    ctx.lineTo(b.x + b.w + 8, eaveY - 6);
+    ctx.lineTo(b.x + b.w + 8, frontBottom - 7);
+    ctx.lineTo(b.x + b.w, frontBottom);
     ctx.closePath();
     ctx.fill();
 
-    ctx.shadowColor = "rgba(255, 190, 96, .38)";
-    ctx.shadowBlur = 7;
+    roundedRectPath(b.x, eaveY - 2, b.w, frontBottom - eaveY + 2, 4);
+    ctx.fillStyle = b.wall;
+    ctx.fill();
+
+    const roof = ctx.createLinearGradient(b.x, roofTop, b.x, eaveY + 8);
+    roof.addColorStop(0, "#78919a");
+    roof.addColorStop(.38, b.roof);
+    roof.addColorStop(1, "#24363e");
+    ctx.beginPath();
+    ctx.moveTo(b.x - 7, eaveY);
+    ctx.lineTo(b.x + b.w * .5, roofTop);
+    ctx.lineTo(b.x + b.w + 7, eaveY);
+    ctx.lineTo(b.x + b.w - 3, eaveY + 9);
+    ctx.lineTo(b.x + 3, eaveY + 9);
+    ctx.closePath();
+    ctx.fillStyle = roof;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(18, 35, 42, .76)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(210, 232, 236, .32)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(b.x + b.w * .5, roofTop + 2);
+    ctx.lineTo(b.x + b.w * .5, eaveY + 4);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(251, 254, 254, .96)";
+    ctx.beginPath();
+    ctx.moveTo(b.x - 5, eaveY - 1);
+    ctx.lineTo(b.x + b.w * .5, roofTop - 2);
+    ctx.quadraticCurveTo(b.x + b.w * .58, roofTop + 1, b.x + b.w * .66, roofTop + 8);
+    ctx.lineTo(b.x + b.w + 5, eaveY - 1);
+    ctx.lineTo(b.x + b.w + 1, eaveY + 5);
+    ctx.quadraticCurveTo(b.x + b.w * .72, eaveY + 1, b.x + b.w * .51, roofTop + 6);
+    ctx.lineTo(b.x + 1, eaveY + 5);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.shadowColor = "rgba(255, 190, 96, .5)";
+    ctx.shadowBlur = 9;
     ctx.fillStyle = b.accent;
-    const windowY = b.y + b.h * .63;
+    const windowY = Math.min(frontBottom - 17, eaveY + 10);
     for (let x = b.x + 13; x < b.x + b.w - 11; x += 27) {
-      roundedRectPath(x, windowY, 11, 8, 1.5);
+      roundedRectPath(x, windowY, 11, 9, 2);
       ctx.fill();
     }
     ctx.shadowColor = "transparent";
 
-    roundedRectPath(b.x + b.w / 2 - Math.min(54, b.w * .38), b.y + b.h - 13, Math.min(108, b.w * .76), 16, 4);
+    roundedRectPath(b.x + b.w / 2 - Math.min(54, b.w * .38), frontBottom - 13, Math.min(108, b.w * .76), 16, 5);
     ctx.fillStyle = "rgba(11, 21, 26, .82)";
     ctx.fill();
     ctx.fillStyle = "#dce8eb";
     ctx.font = "800 9px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h - 2);
+    ctx.fillText(b.label, b.x + b.w / 2, frontBottom - 2);
     ctx.restore();
+  }
+
+  function drawBackdrop() {
+    const backdrop = ctx.createLinearGradient(0, 0, 0, H);
+    backdrop.addColorStop(0, "#18303b");
+    backdrop.addColorStop(.45, "#0e2029");
+    backdrop.addColorStop(1, "#07151c");
+    ctx.fillStyle = backdrop;
+    ctx.fillRect(0, 0, W, H);
+    const glow = ctx.createRadialGradient(W * .42, H * .35, 20, W * .42, H * .35, 520);
+    glow.addColorStop(0, "rgba(132, 190, 205, .2)");
+    glow.addColorStop(1, "rgba(25, 55, 66, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
   }
 
   function drawWorld() {
@@ -781,15 +833,18 @@
     roads.forEach(r => ctx.fillRect(r.x, r.y, r.w, r.h));
 
     ctx.save();
-    ctx.shadowColor = "rgba(74, 105, 116, .4)";
-    ctx.shadowBlur = 5;
-    ctx.shadowOffsetY = 3;
+    ctx.shadowColor = "rgba(74, 105, 116, .28)";
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetY = 2;
     ctx.strokeStyle = "rgba(248, 252, 252, .9)";
-    ctx.lineWidth = 8;
+    ctx.lineWidth = 7;
+    ctx.lineCap = "round";
+    ctx.setLineDash([28, 9, 13, 8]);
     townBlocks.forEach(block => {
       roundedRectPath(block.x + 2, block.y + 2, block.w - 4, block.h - 4, 5);
       ctx.stroke();
     });
+    ctx.setLineDash([]);
     ctx.restore();
 
     ctx.strokeStyle = "rgba(136, 164, 172, .5)";
@@ -905,6 +960,31 @@
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(snowSurface, -CELL / 2, -CELL / 2, W + CELL, H + CELL);
 
+    ctx.lineCap = "round";
+    for (let y = 0; y < ROWS; y += 2) {
+      for (let x = 0; x < COLS; x += 2) {
+        const idx = y * COLS + x;
+        const d = state.snow[idx];
+        const cx = x * CELL + CELL / 2;
+        const cy = y * CELL + CELL / 2;
+        if (d < .18 || !isRoad(cx, cy)) continue;
+        const drift = noise2D(x, y, state.scenario.seed + 31);
+        const length = 10 + drift * 16;
+        ctx.strokeStyle = `rgba(112, 151, 164, ${Math.min(.3, .08 + d * .14)})`;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(cx - length / 2, cy + 2);
+        ctx.quadraticCurveTo(cx, cy + 5 + drift * 3, cx + length / 2, cy + 1);
+        ctx.stroke();
+        ctx.strokeStyle = `rgba(255, 255, 255, ${Math.min(.5, .16 + d * .2)})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(cx - length / 2, cy);
+        ctx.quadraticCurveTo(cx, cy + 3 + drift * 2, cx + length / 2, cy - 1);
+        ctx.stroke();
+      }
+    }
+
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
         const idx = y * COLS + x;
@@ -951,6 +1031,7 @@
       const horizontal = c.w > c.h;
       ctx.save();
       ctx.translate(c.x + c.w / 2, c.y + c.h / 2);
+      ctx.scale(1.06, 1.06);
       ctx.shadowColor = "rgba(4, 11, 15, .7)";
       ctx.shadowBlur = 6;
       ctx.shadowOffsetY = 4;
@@ -983,6 +1064,7 @@
     if (!npc.active || npc.completed) return;
     ctx.save();
     ctx.translate(npc.x, npc.y);
+    ctx.scale(1.06, 1.06);
     ctx.shadowColor = "rgba(4, 11, 15, .7)";
     ctx.shadowBlur = 7;
     ctx.shadowOffsetY = 4;
@@ -1050,6 +1132,7 @@
     ctx.save();
     ctx.translate(t.x, t.y);
     ctx.rotate(t.angle);
+    ctx.scale(1.12, 1.12);
     ctx.fillStyle = "rgba(4, 10, 14, .5)";
     ctx.beginPath();
     ctx.ellipse(1, 5, 29, 17, 0, 0, Math.PI * 2);
@@ -1144,6 +1227,10 @@
   }
 
   function render() {
+    drawBackdrop();
+    ctx.save();
+    ctx.translate(0, WORLD_OFFSET_Y);
+    ctx.scale(1, WORLD_TILT);
     drawWorld();
     drawSnow();
     drawConnectivity();
@@ -1151,6 +1238,7 @@
     drawCars();
     drawNpc();
     drawTruck();
+    ctx.restore();
     drawWeather();
   }
 

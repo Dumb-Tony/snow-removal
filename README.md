@@ -1,6 +1,6 @@
-# SNOW REMOVAL — Browser Vertical Slice v0.3
+# SNOW REMOVAL — Browser Vertical Slice v0.4
 
-A no-build Canvas prototype about keeping a small town moving during an active storm. Version 0.3 establishes the first cohesive visual direction with continuous roads, smoothed snow cover, dimensional landmarks and vehicles, roadside scenery, weather lighting, and readable snowbanks.
+A no-build Canvas prototype about keeping a small town moving during an active storm. Version 0.4 presents Bellwether as a stylized 2.5D toy town with an oblique camera, pitched snow-capped roofs, extruded landmarks, chunky vehicles, sculpted snow, roadside scenery, and warmer municipal UI.
 
 > **Public playtest:** [Play SNOW REMOVAL in your browser](https://dumb-tony.github.io/snow-removal/)
 

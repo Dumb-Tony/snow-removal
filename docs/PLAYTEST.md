@@ -2,7 +2,7 @@
 
 **Playable build:** https://dumb-tony.github.io/snow-removal/  
 **Target time:** 12–18 minutes  
-**Build line:** Browser vertical slice v0.3 visual pass
+**Build line:** Browser vertical slice v0.4 stylized 2.5D pass
 
 ## What this playtest is testing
 
@@ -52,7 +52,7 @@ Optional: download the JSON debrief from the end screen and attach it to the not
 
 ## Known limitations
 
-- The stylized top-down town and arcade handling remain stand-ins for the eventual 3D game, but now establish the intended grounded, wintry, municipal tone.
+- The stylized oblique town and arcade handling remain stand-ins for the eventual 3D game, but now establish the intended chunky, wintry, municipal toy-town tone.
 - Snow uses a coarse 40 px field and can change access status abruptly at cell boundaries.
 - The delivery van follows one fixed road and has deliberately simple behavior.
 - Audio cues are synthesized placeholders.

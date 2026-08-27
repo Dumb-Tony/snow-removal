@@ -18,6 +18,7 @@
 ### P1 — Legibility and tuning
 
 - [x] Cohesive v0.3 environment pass: continuous roads, curb blocks, lit/snow-capped landmarks, roadside scenery, dimensional vehicles, and storm vignette.
+- [x] v0.4 oblique 2.5D pass: tilted town projection, pitched/extruded landmarks, chunky scenery and vehicles, sculpted snow ridges, and toy-like UI framing.
 - [x] Bilinearly smoothed snow surface with shaped high-depth banks; simulation tiles are no longer directly visible.
 - [x] First-shift briefing with paused clock and scenario-specific dispatch context.
 - [x] Volume-driven blade-right spray trail tied to actual snow transfer.
@@ -55,7 +56,7 @@
 |---|---|---|
 | M0 Design-ready | Documents, scope, architecture, scaffold | Another developer can implement without unresolved fundamentals |
 | M1 Functional loop | Current browser v0.1 | One complete shift is playable from file open to debrief |
-| M2 Readable slice | Current browser v0.3: cohesive art pass, onboarding, scenarios, feedback, sound, controller | 4/5 new players explain access versus placement tradeoff |
+| M2 Readable slice | Current browser v0.4: stylized 2.5D art pass, onboarding, scenarios, feedback, sound, controller | 4/5 new players explain access versus placement tradeoff |
 | M3 Durable systems | Seeds, NPC incident, persistence mock | Two shifts produce distinct, recoverable aftermath stories |
 | M4 Unity proof | 3D/network spikes | Two clients observe consistent useful snow state |
 
